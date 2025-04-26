@@ -33,7 +33,8 @@
   ],
   "nodes": [
     {
-      "name": "robot"
+      "name": "robot",
+      "hostnames": [".*"]
     }
   ]
 }
