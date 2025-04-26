@@ -1,0 +1,54 @@
+load("@aos//aos/flatbuffers:generate.bzl", "static_flatbuffer")
+load("@aos//aos:config.bzl", "aos_config")
+
+aos_config(
+    name = "aos_config",
+    src = "aos_config_source.json",
+    flatbuffers = [
+        ":can_logging_fbs",
+        "@aos//aos/logging:dynamic_log_command_fbs",
+        "@aos//aos/logging:log_message_fbs",
+        "@aos//aos/events:event_loop_fbs",
+    ],
+)
+
+cc_binary(
+    name = "can_logger",
+    srcs = [
+        "can_logger_main.cc",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":can_logger_lib",
+        "@aos//aos:init",
+        "@aos//aos/events:shm_event_loop",
+        "@aos//aos/time",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
+cc_library(
+    name = "can_logger_lib",
+    srcs = [
+        "can_logger.cc",
+        "can_logger.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":can_logging_fbs",
+        "@aos//aos/events:shm_event_loop",
+        "@aos//aos/scoped:scoped_fd",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
+static_flatbuffer(
+    name = "can_logging_fbs",
+    srcs = [
+        "can_logging.fbs",
+    ],
+    visibility = ["//visibility:public"],
+)

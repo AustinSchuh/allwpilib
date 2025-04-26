@@ -4,6 +4,8 @@ common --enable_bzlmod --enable_workspace
 # Resolves to --config=linux on Linux, --config=macos on Mac, --windows on windows
 common --enable_platform_specific_config
 
+common --cxxopt="-std=c++20" --host_cxxopt="-std=c++20"
+
 # Make bazel 8 work for us.
 common --enable_workspace
 build --experimental_cc_static_library

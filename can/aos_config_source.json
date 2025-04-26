@@ -1,0 +1,39 @@
+{
+  "channel_storage_duration": 10000000000,
+  "channels": [
+    {
+      "name": "/aos",
+      "type": "aos.timing.Report",
+      "source_node": "robot",
+      "frequency": 60,
+      "num_senders": 60,
+      "max_size": 42000
+    },
+    {
+      "name": "/aos",
+      "type": "aos.logging.LogMessageFbs",
+      "source_node": "robot",
+      "frequency": 200,
+      "num_senders": 70
+    },
+    {
+      "name": "/aos",
+      "type": "aos.logging.DynamicLogCommand",
+      "source_node": "robot",
+      "frequency": 10,
+      "num_senders": 40
+    },
+    {
+      "name": "/can",
+      "type": "frc.can_logger.CanFrame",
+      "source_node": "robot",
+      "frequency": 10000,
+      "max_size": 256
+    }
+  ],
+  "nodes": [
+    {
+      "name": "robot"
+    }
+  ]
+}
