@@ -91,3 +91,6 @@ build --@rules_python//python/config_settings:bootstrap_impl=script
 build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
 
 try-import %workspace%/bazel_auth.rc
+
+build --per_file_copt=third_party.*,external.*@-Wno-pedantic
+build --host_per_file_copt=third_party.*,external.*@-Wno-pedantic

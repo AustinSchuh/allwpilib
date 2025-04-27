@@ -29,6 +29,18 @@
       "source_node": "robot",
       "frequency": 10000,
       "max_size": 256
+    },
+    {
+      "name": "/test",
+      "type": "aos.examples.Ping",
+      "source_node": "robot",
+      "frequency": 4500
+    },
+    {
+      "name": "/test",
+      "type": "aos.examples.Pong",
+      "source_node": "robot",
+      "frequency": 4500
     }
   ],
   "nodes": [
