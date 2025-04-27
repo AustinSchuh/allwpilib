@@ -57,3 +57,6 @@ build:ci --config=build_buddy
 build:ci --remote_download_minimal
 
 build --build_metadata=REPO_URL=https://github.com/wpilibsuite/allwpilib.git
+
+build --per_file_copt=third_party.*,external.*@-Wno-pedantic
+build --host_per_file_copt=third_party.*,external.*@-Wno-pedantic

@@ -227,18 +227,28 @@ apple_support_dependencies()
 #    path = "/home/austin/local/aos/",
 #)
 
+AOS_GIT_COMMIT = "5312df2ab317d679235dcfdb7a9c22850942c455"
+
+AOS_SHA256 = "9a08482bdbe430e1a13aadf69463d562b9b86bd2cae34d781ac3d2899252dad3"
+
 http_archive(
     name = "aos",
-    sha256 = "8c6b82741f6c8fb0cc3bfe6de0604a02bb1ff0457ecdf24919dd9110916de788",
-    strip_prefix = "aos-daeff11b096936f34006393128bf47898ea38fa3",
-    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/daeff11b096936f34006393128bf47898ea38fa3.zip",
+    patch_args = [
+        "-p1",
+    ],
+    patches = [
+        "//thirdparty/aos:public_benchmark.patch",
+    ],
+    sha256 = AOS_SHA256,
+    strip_prefix = "aos-" + AOS_GIT_COMMIT,
+    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/" + AOS_GIT_COMMIT + ".zip",
 )
 
 http_archive(
     name = "com_github_google_flatbuffers",
-    sha256 = "8c6b82741f6c8fb0cc3bfe6de0604a02bb1ff0457ecdf24919dd9110916de788",
-    strip_prefix = "aos-daeff11b096936f34006393128bf47898ea38fa3/third_party/flatbuffers/",
-    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/daeff11b096936f34006393128bf47898ea38fa3.zip",
+    sha256 = AOS_SHA256,
+    strip_prefix = "aos-" + AOS_GIT_COMMIT + "/third_party/flatbuffers/",
+    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/" + AOS_GIT_COMMIT + ".zip",
 )
 
 #local_repository(
@@ -282,9 +292,9 @@ go_register_toolchains(version = "1.24.2")
 #)
 http_archive(
     name = "rules_rust",
-    sha256 = "8c6b82741f6c8fb0cc3bfe6de0604a02bb1ff0457ecdf24919dd9110916de788",
-    strip_prefix = "aos-daeff11b096936f34006393128bf47898ea38fa3/third_party/rules_rust/",
-    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/daeff11b096936f34006393128bf47898ea38fa3.zip",
+    sha256 = AOS_SHA256,
+    strip_prefix = "aos-" + AOS_GIT_COMMIT + "/third_party/rules_rust/",
+    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/" + AOS_GIT_COMMIT + ".zip",
 )
 
 load("@rules_rust//rust:repositories.bzl", "rust_analyzer_toolchain_repository", "rust_repository_set")
@@ -610,3 +620,71 @@ grpc_deps()
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
+
+http_archive(
+    name = "com_github_foxglove_ws-protocol",
+    build_file = "@aos//third_party/foxglove/ws_protocol:foxglove_ws_protocol.BUILD",
+    patch_args = ["-p1"],
+    patches = ["@aos//third_party/foxglove/ws_protocol:foxglove_ws_protocol.patch"],
+    sha256 = "eee484aefe4cb08dcef9ec52df5f904e017e15517865dcfa2462ff8070c9d906",
+    strip_prefix = "ws-protocol-releases-typescript-ws-protocol-examples-v0.8.1",
+    url = "https://github.com/foxglove/ws-protocol/archive/refs/tags/releases/typescript/ws-protocol-examples/v0.8.1.tar.gz",
+)
+
+# Source code of LZ4 (files under lib/) are under BSD 2-Clause.
+# The rest of the repository (build information, documentation, etc.) is under GPLv2.
+# We only care about the lib/ subfolder anyways, and strip out any other files.
+http_archive(
+    name = "com_github_lz4_lz4",
+    build_file = "@aos//debian:BUILD.lz4.bazel",
+    sha256 = "0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b",
+    strip_prefix = "lz4-1.9.4/lib",
+    url = "https://github.com/lz4/lz4/archive/refs/tags/v1.9.4.tar.gz",
+)
+
+http_archive(
+    name = "com_github_zaphoyd_websocketpp",
+    build_file = "@aos//third_party/websocketpp:websocketpp.BUILD",
+    patch_args = ["-p1"],
+    patches = ["@aos//third_party/websocketpp:websocketpp.patch"],
+    sha256 = "6ce889d85ecdc2d8fa07408d6787e7352510750daa66b5ad44aacb47bea76755",
+    strip_prefix = "websocketpp-0.8.2",
+    url = "https://github.com/zaphoyd/websocketpp/archive/refs/tags/0.8.2.tar.gz",
+)
+
+http_archive(
+    name = "asio",
+    build_file_content = """
+cc_library(
+    name = "asio",
+    hdrs = glob(["include/asio/**/*.hpp", "include/asio/**/*.ipp", "include/asio.hpp"]),
+    visibility = ["//visibility:public"],
+    defines = ["ASIO_STANDALONE"],
+    includes = ["include/"],
+)""",
+    sha256 = "8976812c24a118600f6fcf071a20606630a69afe4c0abee3b0dea528e682c585",
+    strip_prefix = "asio-1.24.0",
+    url = "https://downloads.sourceforge.net/project/asio/asio/1.24.0%2520%2528Stable%2529/asio-1.24.0.tar.bz2",
+)
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_pkg",
+    sha256 = "b7215c636f22c1849f1c3142c72f4b954bb12bb8dcf3cbe229ae6e69cc6479db",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/1.1.0/rules_pkg-1.1.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/1.1.0/rules_pkg-1.1.0.tar.gz",
+    ],
+)
+
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
+rules_pkg_dependencies()
+
+http_archive(
+    name = "snappy",
+    sha256 = "8c6b82741f6c8fb0cc3bfe6de0604a02bb1ff0457ecdf24919dd9110916de788",
+    strip_prefix = "aos-daeff11b096936f34006393128bf47898ea38fa3/third_party/snappy",
+    url = "https://github.com/RealtimeRoboticsGroup/aos/archive/daeff11b096936f34006393128bf47898ea38fa3.zip",
+)
