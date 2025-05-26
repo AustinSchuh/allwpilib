@@ -1,0 +1,44 @@
+diff --git a/aos/ipc_lib/BUILD b/aos/ipc_lib/BUILD
+index ee9ef7b83c..f34486f7b3 100644
+--- a/aos/ipc_lib/BUILD
++++ b/aos/ipc_lib/BUILD
+@@ -101,6 +101,7 @@ cc_binary(
+     ],
+     linkopts = ["-lrt"],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":event",
+         "//aos:condition",
+@@ -346,6 +347,7 @@ cc_binary(
+         "signal_stress.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
+@@ -360,6 +362,7 @@ cc_binary(
+         "futex_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:condition",
+@@ -375,6 +378,7 @@ cc_binary(
+         "named_pipe_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
+@@ -389,6 +393,7 @@ cc_binary(
+         "eventfd_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
