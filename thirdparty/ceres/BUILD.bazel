@@ -27,18 +27,20 @@ cc_import(
 
 cc_library(
     name = "ceres",
-    deps = [
-        ":ceres-impl",
-        "@ceres_headers//:headers",
-    ],
-    defines = ["GLOG_NO_GFLAGS", "GLOG_USE_GLOG_EXPORT"] + select({
+    defines = [
+        "GLOG_NO_GFLAGS",
+        "GLOG_USE_GLOG_EXPORT",
+    ] + select({
         "@platforms//os:windows": ["GLOG_DEPRECATED=__declspec(deprecated)"],
         "//conditions:default": ["GLOG_DEPRECATED=[[deprecated]]"],
     }),
     linkopts = select({
-        "@platforms//os:windows": ["dbghelp.lib"],
         "@platforms//os:linux": ["-lgfortran"],
+        "@platforms//os:windows": ["dbghelp.lib"],
         "//conditions:default": [],
     }),
-
+    deps = [
+        ":ceres-impl",
+        "@ceres_headers//:headers",
+    ],
 )

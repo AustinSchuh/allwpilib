@@ -2,8 +2,6 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-
-
 def ceres_repositories():
     """ Fetches the ceres solver libraries """
 
