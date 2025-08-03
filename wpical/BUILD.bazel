@@ -89,55 +89,60 @@ wpilib_objc_library(
     ],
 )
 
-copts = select({"@platforms//os:linux": [
-    "-Wno-pedantic",
-    "-Wno-format-nonliteral",
-    "-Wno-unused-variable",
-    "-Wno-unused-function",
-    "-Wno-sign-compare",
-    "-Wno-maybe-uninitialized",
-],
-"@platforms//os:osx": [
-],
-"@platforms//os:windows": [
+copts = select({
+    "@platforms//os:linux": [
+        "-Wno-pedantic",
+        "-Wno-format-nonliteral",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+        "-Wno-sign-compare",
+        "-Wno-maybe-uninitialized",
+    ],
+    "@platforms//os:osx": [
+    ],
+    "@platforms//os:windows": [
         "/wd4047",
         "/wd4098",
         "/wd4267",
-]})
+    ],
+})
 
-cxxopts = select({"@platforms//os:linux":[
-    "-Wno-missing-field-initializers",
-    "-Wno-deprecated-declarations",
-    "-Wno-deprecated-enum-enum-conversion",
-    "-fpermissive",
-    "-Wno-return-type",
-    "-Wno-missing-braces",
-    "-Wno-null-conversion",
-    "-Wno-unused-but-set-variable",
-],
-"@platforms//os:osx": [
-],
-		  "@platforms//os:windows": [
+cxxopts = select({
+    "@platforms//os:linux": [
+        "-Wno-missing-field-initializers",
+        "-Wno-deprecated-declarations",
+        "-Wno-deprecated-enum-enum-conversion",
+        "-fpermissive",
+        "-Wno-return-type",
+        "-Wno-missing-braces",
+        "-Wno-null-conversion",
+        "-Wno-unused-but-set-variable",
+    ],
+    "@platforms//os:osx": [
+    ],
+    "@platforms//os:windows": [
         "/wd4068",
         "/wd4101",
         "/wd4200",
         "/wd4576",
         "/wd4715",
-		  ]})
+    ],
+})
+
 linkopts = select({
-        "@platforms//os:osx": [
-        ],
-        "@platforms//os:windows": [
-            "-DEFAULTLIB:Gdi32.lib",
-            "-DEFAULTLIB:Shell32.lib",
-            "-DEFAULTLIB:d3d11.lib",
-            "-DEFAULTLIB:d3dcompiler.lib",
-            "-DEFAULTLIB:Comdlg32.lib",
-            "-DEFAULTLIB:dbghelp.lib",
-            "-DEFAULTLIB:Advapi32.lib",
-        ],
-	"@platforms//os:linux": [],
-    })
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [
+    ],
+    "@platforms//os:windows": [
+        "-DEFAULTLIB:Gdi32.lib",
+        "-DEFAULTLIB:Shell32.lib",
+        "-DEFAULTLIB:d3d11.lib",
+        "-DEFAULTLIB:d3dcompiler.lib",
+        "-DEFAULTLIB:Comdlg32.lib",
+        "-DEFAULTLIB:dbghelp.lib",
+        "-DEFAULTLIB:Advapi32.lib",
+    ],
+})
 
 wpilib_cc_library(
     name = "wpical_lib",
@@ -158,10 +163,10 @@ wpilib_cc_library(
     defines = ["OPENCV_DISABLE_EIGEN_TENSOR_SUPPORT"],
     extra_src_pkg_files = [":native-pkg"],
     include_license_files = True,
+    linkopts = linkopts,
     linkstatic = True,
     strip_include_prefix = "include",
     visibility = ["//visibility:public"],
-    linkopts = linkopts,
     deps = [
         ":headers",
         "//apriltag",
@@ -183,12 +188,12 @@ cc_binary(
     copts = copts,
     cxxopts = cxxopts,
     linkopts = select({
+        "@platforms//os:linux": [],
         "@platforms//os:osx": [
         ],
         "@platforms//os:windows": [
             "-SUBSYSTEM:WINDOWS",
         ],
-	"@platforms//os:linux": [],
     }),
     deps = [
         ":wpical_lib",
@@ -198,16 +203,16 @@ cc_binary(
 
 cc_test(
     name = "wpical_test",
+    size = "small",
     srcs = glob(["src/test/native/**"]),
     copts = copts,
     cxxopts = cxxopts,
-    size = "small",
     data = glob(["src/main/native/resources/**"]),
     defines = ['PROJECT_ROOT_PATH=\\"wpical/src/main/native/resources\\"'],
+    linkopts = linkopts,
     deps = [
         ":wpical_lib",
         "//thirdparty/ceres",
         "//thirdparty/googletest",
     ],
-    linkopts = linkopts,
 )
