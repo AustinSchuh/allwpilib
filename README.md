@@ -57,7 +57,10 @@ Using Gradle makes building WPILib very straightforward. It only has a few depen
 - Raspberry Pi toolchain (optional)
     - Run `./gradlew installArm32Toolchain` after cloning this repository
 
+
 On macOS ARM, run `softwareupdate --install-rosetta`. This is necessary to be able to use the macOS x86 roboRIO toolchain on ARM.
+
+On linux, run `sudo apt install libx11-dev libgl-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev` to be able to build things depending on glfw.
 
 ## Setup
 
