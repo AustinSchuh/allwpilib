@@ -247,13 +247,13 @@ cc_test(
     srcs = glob(["src/test/native/**"]),
     copts = copts,
     cxxopts = cxxopts,
-    data = glob(["src/main/native/resources/**"]) + [
-        "src/main/native/resources",
-        "src/main/native/resources/altfieldvideo",
-        "src/main/native/resources/fieldvideo",
+    data = glob(["src/main/native/assets/**"]) + [
+        "src/main/native/assets",
+        "src/main/native/assets/altfieldvideo",
+        "src/main/native/assets/fieldvideo",
     ],
     defines = [
-        'PROJECT_ROOT_PATH=\\"wpical/src/main/native/resources\\"',
+        'PROJECT_ROOT_PATH=\\"wpical/src/main/native/assets\\"',
         "__BAZEL__=1",
     ],
     linkopts = linkopts,
