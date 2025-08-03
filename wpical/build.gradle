@@ -1,6 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
 
-if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxsystemcore')) {
+if (project.hasProperty('onlylinuxsystemcore')) {
     return;
 }
 
@@ -120,7 +120,7 @@ nativeUtils.platformConfigs.each {
         it.cppCompiler.args.add("-fpermissive")
     }
 }
-def testResources = "\"$rootDir/wpical/src/main/native/resources\"".replace("\\", "/")
+def testResources = "\"$rootDir/wpical/src/main/native/assets\"".replace("\\", "/")
 model {
     components {
         "${nativeName}"(NativeExecutableSpec) {
@@ -152,7 +152,7 @@ model {
                 }
             }
             binaries.all {
-                if (it.targetPlatform.name == nativeUtils.wpi.platforms.systemcore || it.targetPlatform.name.startsWith("linuxarm")) {
+                if (it.targetPlatform.name == nativeUtils.wpi.platforms.systemcore) {
                     it.buildable = false
                     return
                 }
@@ -205,7 +205,7 @@ model {
                 }
             }
             binaries.all {
-                if (it.targetPlatform.name == nativeUtils.wpi.platforms.systemcore || it.targetPlatform.name.startsWith("linuxarm")) {
+                if (it.targetPlatform.name == nativeUtils.wpi.platforms.systemcore) {
                     it.buildable = false
                     return
                 }

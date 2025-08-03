@@ -19,7 +19,7 @@ const char* const tmpdir_c_str = std::getenv("TEST_TMPDIR");
 const std::string calSavePath =
     tmpdir_c_str == nullptr
         ? (projectRootPath.substr(
-               0, projectRootPath.find("/src/main/native/resources")) +
+               0, projectRootPath.find("/src/main/native/assets")) +
            "/build")
         : std::string(tmpdir_c_str);
 cameracalibration::CameraModel cameraModel = {
@@ -38,7 +38,6 @@ const std::string videoLocation = "/fieldvideo";
 #endif
 
 TEST(Camera_CalibrationTest, OpenCV_Typical) {
-  std::cerr << "Save path " << calSavePath << std::endl;
   int ret = cameracalibration::calibrate(LookupPath(
       projectRootPath + "/testcalibration" + fileSuffix), cameraModel, 0.709f,
       0.551f, 12, 8, false);
