@@ -11,10 +11,14 @@
 #include <wpi/json.h>
 
 const std::string projectRootPath = PROJECT_ROOT_PATH;
+
+const char *const tmpdir_c_str = getenv("TEST_TMPDIR");
+
 const std::string calSavePath =
+tmpdir_c_str == nullptr ? (
     projectRootPath.substr(0,
                            projectRootPath.find("/src/main/native/resources")) +
-    "/build";
+    "/build") : std::string(tmpdir_c_str);
 cameracalibration::CameraModel cameraModel = {
     .intrinsic_matrix = Eigen::Matrix<double, 3, 3>::Identity(),
     .distortion_coefficients = Eigen::Matrix<double, 8, 1>::Zero(),
