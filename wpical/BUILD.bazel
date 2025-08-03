@@ -86,16 +86,23 @@ wpilib_objc_library(
     ],
 )
 
-copts = [
+copts = select({"@platforms//os:linux": [
     "-Wno-pedantic",
     "-Wno-format-nonliteral",
     "-Wno-unused-variable",
     "-Wno-unused-function",
     "-Wno-sign-compare",
     "-Wno-maybe-uninitialized",
-]
+],
+"@platforms//os:osx": [
+],
+"@platforms//os:windows": [
+        "/wd4047",
+        "/wd4098",
+        "/wd4267",
+]})
 
-cxxopts = [
+cxxopts = select({"@platforms//os:linux":[
     "-Wno-missing-field-initializers",
     "-Wno-deprecated-declarations",
     "-Wno-deprecated-enum-enum-conversion",
@@ -104,7 +111,30 @@ cxxopts = [
     "-Wno-missing-braces",
     "-Wno-null-conversion",
     "-Wno-unused-but-set-variable",
-]
+],
+"@platforms//os:osx": [
+],
+		  "@platforms//os:windows": [
+        "/wd4068",
+        "/wd4101",
+        "/wd4200",
+        "/wd4576",
+        "/wd4715",
+		  ]})
+linkopts = select({
+        "@platforms//os:osx": [
+        ],
+        "@platforms//os:windows": [
+            "-DEFAULTLIB:Gdi32.lib",
+            "-DEFAULTLIB:Shell32.lib",
+            "-DEFAULTLIB:d3d11.lib",
+            "-DEFAULTLIB:d3dcompiler.lib",
+            "-DEFAULTLIB:Comdlg32.lib",
+            "-DEFAULTLIB:dbghelp.lib",
+            "-DEFAULTLIB:Advapi32.lib",
+        ],
+	"@platforms//os:linux": [],
+    })
 
 wpilib_cc_library(
     name = "wpical_lib",
@@ -119,7 +149,6 @@ wpilib_cc_library(
         exclude = ["src/main/native/cpp/WPIcal.cpp"],
     ) + [
         ":generate-resources",
-        #"//thirdparty/ceres:ceres-impl",
     ],
     copts = copts,
     cxxopts = cxxopts,
@@ -129,6 +158,7 @@ wpilib_cc_library(
     linkstatic = True,
     strip_include_prefix = "include",
     visibility = ["//visibility:public"],
+    linkopts = linkopts,
     deps = [
         ":headers",
         "//apriltag",
@@ -149,6 +179,14 @@ cc_binary(
     ],
     copts = copts,
     cxxopts = cxxopts,
+    linkopts = select({
+        "@platforms//os:osx": [
+        ],
+        "@platforms//os:windows": [
+            "-SUBSYSTEM:WINDOWS",
+        ],
+	"@platforms//os:linux": [],
+    }),
     deps = [
         ":wpical_lib",
         "//thirdparty/imgui_suite",
@@ -160,6 +198,7 @@ cc_test(
     srcs = glob(["src/test/native/**"]),
     copts = copts,
     cxxopts = cxxopts,
+    size = "small",
     data = glob(["src/main/native/resources/**"]),
     defines = ['PROJECT_ROOT_PATH=\\"wpical/src/main/native/resources\\"'],
     deps = [
@@ -167,4 +206,5 @@ cc_test(
         "//thirdparty/ceres",
         "//thirdparty/googletest",
     ],
+    linkopts = linkopts,
 )
