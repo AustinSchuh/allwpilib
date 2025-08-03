@@ -24,18 +24,18 @@ cc_library(
     )
 
     _LIB_ARTIFACTS = {
-        "linuxarm32static": ("linux", "**/*.a", None),
-        "linuxarm32staticdebug": ("linux", "**/*.a", None),
-        "linuxarm64static": ("linux", "**/*.a", None),
-        "linuxarm64staticdebug": ("linux", "**/*.a", None),
+        "linuxarm32static": ("linux", "**/*.a", "sha256-/T5gxzmNcLsHDYw1Z7jDyF2tyX41ZpFklhE/RkAGCdg="),
+        "linuxarm32staticdebug": ("linux", "**/*.a", "sha256-BqVmOxX2h4SHs8VDkaITodUQYioCcCrLQSn02WqeYcU="),
+        "linuxarm64static": ("linux", "**/*.a", "sha256-t4O0uNldvTVHOHzFFL2kFPtkRjhhB/mCLUaGqCZGRfU="),
+        "linuxarm64staticdebug": ("linux", "**/*.a", "sha256-Kx7KKmgAbWlc/soFUjvkL71tJ0lXcQZNnuCRDXx5EvE="),
         "linuxx86-64static": ("linux", "**/*.a", "sha256-hnu8IPvOHeob+bziww9DoNpxj6Y8I4xigzN5u9a10Q8="),
-        "linuxx86-64staticdebug": ("linux", "**/*.a", None),
-        "osxuniversalstatic": ("osx", "**/*.a", None),
-        "osxuniversalstaticdebug": ("osx", "**/*.a", None),
-        "windowsarm64static": ("windows", "**/*.lib", None),
-        "windowsarm64staticdebug": ("windows", "**/*.lib", None),
-        "windowsx86-64static": ("windows", "**/*.lib", None),
-        "windowsx86-64staticdebug": ("windows", "**/*.lib", None),
+        "linuxx86-64staticdebug": ("linux", "**/*.a", "sha256-YHAdIMwum7fwHVouDLFSY2eB9qJ6+TlToKgkDjl+eWQ="),
+        "osxuniversalstatic": ("osx", "**/*.a", "sha256-RFs2zECinIXjV7ADwZgZuUpd3ejnaF8h+aLxPizmO4o="),
+        "osxuniversalstaticdebug": ("osx", "**/*.a", "sha256-WcUduHbmgD/1UgWFHi59ZOWiHfHy4tmpmwBbDUxbUq0="),
+        "windowsarm64static": ("windows", "**/*.lib", "sha256-u2M+QCOsT4KyES7wj55z6Myb09Q4jx376z4qmWkKHEM="),
+        "windowsarm64staticdebug": ("windows", "**/*.lib", "sha256-iwXfrj5p1VRLpAyy0fj5ntrKGgsgqJq6KIMH4YxB9xg="),
+        "windowsx86-64static": ("windows", "**/*.lib", "sha256-rFIRm4+Z0osAL+6ljIRZDFzEKLYzXqf/4T31wfFTj3c="),
+        "windowsx86-64staticdebug": ("windows", "**/*.lib", "sha256-DoD07iN+SE7Qlw3T7/2WBvK7ASL0N4OxW2OQFW9uvRE="),
     }
 
     for artifact, (prefix, glob_pattern, integrity) in _LIB_ARTIFACTS.items():
@@ -48,10 +48,7 @@ filegroup(
 )
 """ % glob_pattern
 
-        if "debug" in artifact:
-            url_fname = "ceres-cpp-2.2-2-" + artifact.replace("staticdebug", "") + "static-debug.zip"
-        else:
-            url_fname = "ceres-cpp-2.2-2-" + artifact.replace("static", "") + "static.zip"
+        url_fname = "ceres-cpp-2.2-2-" + artifact + ".zip"
 
         http_archive(
             name = repo_name,

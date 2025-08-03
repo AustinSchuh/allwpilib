@@ -56,6 +56,24 @@ int cameracalibration::calibrate(const std::string& input_video,
   cv::aruco::CharucoDetector charuco_detector(*charuco_board);
 
   // Video capture
+  std::cout << "Opening video " << input_video << " " << std::filesystem::current_path() << std::endl;
+
+      try {
+        for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path())) {
+            // Print the full path of each entry
+            std::cout << entry.path() << std::endl;
+
+            // Optional: Check if it's a regular file or directory
+            if (std::filesystem::is_regular_file(entry.path())) {
+                std::cout << "  (File)" << std::endl;
+            } else if (std::filesystem::is_directory(entry.path())) {
+                std::cout << "  (Directory)" << std::endl;
+            }
+        }
+    } catch (const std::filesystem::filesystem_error& ex) {
+        std::cerr << "Filesystem error: " << ex.what() << std::endl;
+    }
+
   cv::VideoCapture video_capture(input_video);
   cv::Size frame_shape;
 
@@ -66,6 +84,7 @@ int cameracalibration::calibrate(const std::string& input_video,
   std::vector<std::vector<cv::Point2f>> all_img_points;
 
   while (video_capture.grab()) {
+  std::cout << "Frame " << input_video << std::endl;
     cv::Mat frame;
     video_capture.retrieve(frame);
 
@@ -131,6 +150,8 @@ int cameracalibration::calibrate(const std::string& input_video,
   try {
     // see https://stackoverflow.com/a/75865177
     int flags = cv::CALIB_RATIONAL_MODEL | cv::CALIB_USE_LU;
+    std::cout << "Found " << all_img_points.size() << " points" << std::endl;
+
     repError = cv::calibrateCamera(
         all_obj_points, all_img_points, frame_shape, camera_matrix, dist_coeffs,
         r_vecs, t_vecs, cv::noArray(), cv::noArray(), cv::noArray(), flags);
