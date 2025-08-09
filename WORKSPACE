@@ -231,6 +231,11 @@ http_archive(
     url = "https://github.com/aspect-build/rules_ts/releases/download/v2.1.1/rules_ts-v2.1.1.tar.gz",
 )
 
+local_repository(
+    name = "eigen",
+    path = "wpimath/src/main/native/thirdparty/eigen/include/",
+)
+
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
