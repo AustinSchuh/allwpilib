@@ -29,5 +29,9 @@ build:linux --host_cxxopt=-Wno-missing-requires
 build:linux --host_cxxopt=-Wno-implicit-fallthrough
 
 build:linux --host_per_file_copt=external/zlib/.*\.c@-Wno-deprecated-non-prototype
-build:linux --host_per_file_copt=external.*,third_party.*@-Wno-pedantic,-Wno-overflow,-Wno-return-type,-Wno-format-nonliteral,-Wno-cast-function-type,-Wno-type-limits,-Wno-sign-compare
-build:linux --per_file_copt=external.*,third_party.*@-Wno-variadic-macros,-Wno-pedantic,-Wno-overflow,-Wno-return-type,-Wno-format-nonliteral,-Wno-cast-function-type,-Wno-type-limits,-Wno-sign-compare
+build:linux --host_per_file_copt=external.*,third_party.*@-Wno-pedantic,-Wno-overflow,-Wno-return-type,-Wno-format-nonliteral,-Wno-cast-function-type,-Wno-type-limits,-Wno-sign-compare,-Wno-format-y2k,-Wno-maybe-uninitialized,-Wno-ignored-qualifiers
+build:linux --per_file_copt=external.*,third_party.*@-Wno-variadic-macros,-Wno-pedantic,-Wno-overflow,-Wno-return-type,-Wno-format-nonliteral,-Wno-cast-function-type,-Wno-type-limits,-Wno-sign-compare,-Wno-format-y2k,-Wno-maybe-uninitialized,-Wno-missing-field-initializers,-Wno-ignored-qualifiers
+
+
+build:linux --host_per_file_copt=external/.*\.cc$,third_party.*\.cpp$@-Wno-redundant-move,-Wno-class-memaccess
+build:linux --per_file_copt=external.*\.cc$,third_party.*\.cpp$@-Wno-redundant-move,-Wno-class-memaccess

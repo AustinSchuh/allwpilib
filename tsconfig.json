@@ -1,0 +1,26 @@
+{
+  "compileOnSave": false,
+  "exclude": ["bazel-*"],
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "target": "es2021",
+    "lib": ["es2021", "dom", "dom.iterable"],
+    "moduleResolution": "node",
+    "paths": {
+      "@aos/*": ["./*"]
+    }
+  },
+  "bazelOptions": {
+    "workspaceName": "aos"
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

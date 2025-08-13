@@ -104,8 +104,8 @@ http_archive(
         "@aos//third_party/abseil:0003-Suppress-roborio-warning.patch",
     ],
     repo_mapping = {
-        "@googletest": "@com_google_googletest",
         "@google_benchmark": "@com_github_google_benchmark",
+        "@googletest": "@com_google_googletest",
     },
     sha256 = "9b7a064305e9fd94d124ffa6cc358592eb42b5da588fb4e07d09254aa40086db",
     strip_prefix = "abseil-cpp-20250512.1",
@@ -202,33 +202,6 @@ http_archive(
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
         "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
     ],
-)
-
-http_archive(
-    name = "aspect_rules_rollup",
-    patch_args = [
-        "-p1",
-    ],
-    patches = [
-        "//third_party:rules_rollup/0001-Fix-resolving-files.patch",
-    ],
-    sha256 = "a0433a0b0206a45d362749d71bc1e4e0dacf5ca2a572b059328f9753392bca80",
-    strip_prefix = "rules_rollup-1.0.0",
-    url = "https://github.com/aspect-build/rules_rollup/releases/download/v1.0.0/rules_rollup-v1.0.0.tar.gz",
-)
-
-http_archive(
-    name = "aspect_rules_terser",
-    sha256 = "8424b4c064d0e490e5b6f215b993712ef641b77e03b68fdc64221edf48d14add",
-    strip_prefix = "rules_terser-1.0.0",
-    url = "https://github.com/aspect-build/rules_terser/releases/download/v1.0.0/rules_terser-v1.0.0.tar.gz",
-)
-
-http_archive(
-    name = "aspect_rules_ts",
-    sha256 = "6ad28b5bac2bb5a74e737925fbc3f62ce1edabe5a48d61a9980c491ef4cedfb7",
-    strip_prefix = "rules_ts-2.1.1",
-    url = "https://github.com/aspect-build/rules_ts/releases/download/v2.1.1/rules_ts-v2.1.1.tar.gz",
 )
 
 local_repository(
@@ -427,6 +400,9 @@ register_toolchains(
     "@local_bookworm_64//:macos",
     "@local_bookworm_64//:linux",
     "@local_bookworm_64//:windows",
+    "@aos//tools/rust:rust-toolchain-x86",
+    "@aos//tools/rust:rust-toolchain-armv7",
+    "@aos//tools/rust:rust-toolchain-arm64",
 )
 
 setup_legacy_setup_jdk_dependencies()
@@ -553,6 +529,9 @@ doxygen_repository(
 local_repository(
     name = "aos",
     path = "/home/austin/local/aos/",
+    repo_mapping = {
+        "@pip_deps": "@allwpilib_pip_deps",
+    },
 )
 
 local_repository(
@@ -570,118 +549,23 @@ http_archive(
 )
 
 http_archive(
-    name = "aspect_rules_js",
-    sha256 = "bc9b4a01ef8eb050d8a7a050eedde8ffb1e45a56b0e4094e26f06c17d5fcf1d5",
-    strip_prefix = "rules_js-1.41.2",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v1.41.2/rules_js-v1.41.2.tar.gz",
-)
-
-load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
-
-rules_js_dependencies()
-
-load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock", "pnpm_repository")
-
-pnpm_repository(name = "pnpm")
-
-http_archive(
-    name = "aspect_rules_esbuild",
-    sha256 = "999349afef62875301f45ec8515189ceaf2e85b1e67a17e2d28b95b30e1d6c0b",
-    strip_prefix = "rules_esbuild-0.18.0",
-    url = "https://github.com/aspect-build/rules_esbuild/releases/download/v0.18.0/rules_esbuild-v0.18.0.tar.gz",
-)
-
-load("@aspect_rules_esbuild//esbuild:dependencies.bzl", "rules_esbuild_dependencies")
-
-rules_esbuild_dependencies()
-
-load("@rules_nodejs//nodejs:repositories.bzl", "DEFAULT_NODE_VERSION", "nodejs_register_toolchains")
-
-nodejs_register_toolchains(
-    name = "nodejs",
-    node_version = DEFAULT_NODE_VERSION,
-)
-
-npm_translate_lock(
-    name = "npm",
-    data = [
-        "@aos//:package.json",
-        "@aos//:pnpm-workspace.yaml",
-        "@aos//aos/analysis/foxglove_extension:package.json",
-        "@aos//control_loops/swerve/spline_ui/www:package.json",
-    ],
-
-    # Running lifecycle hooks on npm package fsevents@2.3.2 fails in a dramatic way:
-    # ```
-    # SyntaxError: Unexpected strict mode reserved word
-    # at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:117:18)
-    # at ESMLoader.moduleProvider (node:internal/modules/esm/loader:337:14)
-    # at async link (node:internal/modules/esm/module_job:70:21)
-    # ```
-    lifecycle_hooks_no_sandbox = False,
-    npmrc = "@//:.npmrc",
-    pnpm_lock = "//:pnpm-lock.yaml",
-    quiet = False,
-    update_pnpm_lock = False,
-    verify_node_modules_ignored = "//:.bazelignore",
-)
-
-load("@aspect_rules_esbuild//esbuild:repositories.bzl", "LATEST_ESBUILD_VERSION", "esbuild_register_toolchains")
-
-esbuild_register_toolchains(
-    name = "esbuild",
-    esbuild_version = LATEST_ESBUILD_VERSION,
-)
-
-load("@aspect_rules_terser//terser:dependencies.bzl", "rules_terser_dependencies")
-
-rules_terser_dependencies()
-
-load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies")
-
-rules_ts_dependencies(
-    ts_version_from = "//:package.json",
-)
-
-load("@npm//:repositories.bzl", "npm_repositories")
-
-npm_repositories()
-
-#local_repository(
-#name = "rules_rust",
-#path = "/home/austin/local/aos/third_party/rules_rust",
-#)
-
-#http_archive(
-#name = "rules_rust",
-#integrity = "sha256-w4tiLybzXDRzgQDibReT/yUolzgVRkZ7IticnU2L/VA=",
-#urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.63.0/rules_rust-0.63.0.tar.gz"],
-#)
-
-#http_archive(
-#name = "rules_rust",
-#sha256 = "db89135f4d1eaa047b9f5518ba4037284b43fc87386d08c1d1fe91708e3730ae",
-#urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.27.0/rules_rust-v0.27.0.tar.gz"],
-#)
-
-http_archive(
     name = "rules_rust",
-    sha256 = "4a9cb4fda6ccd5b5ec393b2e944822a62e050c7c06f1ea41607f14c4fdec57a2",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.25.1/rules_rust-v0.25.1.tar.gz"],
+    integrity = "sha256-w4tiLybzXDRzgQDibReT/yUolzgVRkZ7IticnU2L/VA=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.63.0/rules_rust-0.63.0.tar.gz"],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_analyzer_toolchain_repository", "rust_register_toolchains", "rust_repository_set")
+load("@rules_rust//rust:repositories.bzl", "rust_analyzer_toolchain_repository", "rust_repository_set")
 
-RUST_VERSION = "1.70.0"
+RUST_VERSION = "1.81.0"
 
 rust_repository_set(
     name = "rust",
-    allocator_library = "@//tools/rust:forward_allocator",
+    allocator_library = "@aos//tools/rust:forward_allocator",
     edition = "2021",
     exec_triple = "x86_64-unknown-linux-gnu",
     extra_target_triples = [
-        #"arm-unknown-linux-gnueabi",
-        #"armv7-unknown-linux-gnueabihf",
+        "arm-unknown-linux-gnueabi",
+        "armv7-unknown-linux-gnueabihf",
         "aarch64-unknown-linux-gnu",
     ],
     register_toolchain = False,
@@ -700,6 +584,13 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 crates_repository(
     name = "crate_index",
     annotations = {
+        "cxx": [
+            crate.annotation(
+                additive_build_file = "@aos//third_party/cargo:cxx/include.BUILD.bazel",
+                extra_aliased_targets = {"cxx_cc": "cxx_cc"},
+                gen_build_script = False,
+            ),
+        ],
         "link-cplusplus": [
             # Bazel toolchains take care of linking the C++ standard library, so don't add
             # an extra flag via Rust by enabling the `nothing` feature. I'm not even sure
@@ -709,13 +600,6 @@ crates_repository(
                 crate_features = ["nothing"],
             ),
         ],
-        "cxx": [
-            crate.annotation(
-                additive_build_file = "@aos//third_party/cargo:cxx/include.BUILD.bazel",
-                #extra_aliased_targets = ["cxx_cc"],
-                gen_build_script = False,
-            ),
-        ],
         "log": [
             crate.annotation(
                 rustc_flags = ["--cfg=atomic_cas"],
@@ -723,10 +607,6 @@ crates_repository(
         ],
     },
     cargo_lockfile = "//:Cargo.lock",
-    generator_sha256s = {"x86_64-unknown-linux-gnu": "1987a00e7ae12c705fa010b340410230ae8a47d7d95c02900191968b2e745649"},
-    #generator_urls = {
-    #"x86_64-unknown-linux-gnu": "https://realtimeroboticsgroup.org/build-dependencies/cargo-bazel-x86_64-unknown-linux-gnu",
-    #},
     lockfile = "//:Cargo.Bazel.lock",
     manifests = [
         "@aos//:Cargo.toml",
@@ -736,15 +616,14 @@ crates_repository(
         "@aos//third_party/autocxx:gen/cmd/Cargo.toml",
         "@aos//third_party/autocxx:macro/Cargo.toml",
         "@aos//third_party/autocxx:integration-tests/Cargo.toml",
-        "@com_github_google_flatbuffers//rust:flatbuffers/Cargo.toml",
     ],
     rust_toolchain_cargo_template = "@rust__{triple}__{channel}_tools//:bin/{tool}",
     rust_toolchain_rustc_template = "@rust__{triple}__{channel}_tools//:bin/{tool}",
     rust_version = RUST_VERSION,
     supported_platform_triples = [
         "x86_64-unknown-linux-gnu",
-        #"arm-unknown-linux-gnueabi",
-        #"armv7-unknown-linux-gnueabihf",
+        "arm-unknown-linux-gnueabi",
+        "armv7-unknown-linux-gnueabihf",
         "aarch64-unknown-linux-gnu",
     ],
 )
@@ -774,15 +653,11 @@ http_archive(
 crates_repository(
     name = "cxxbridge_cmd_deps",
     cargo_lockfile = "//third_party/cargo:cxxbridge-cmd/Cargo.lock",
-    generator_sha256s = {"x86_64-unknown-linux-gnu": "1987a00e7ae12c705fa010b340410230ae8a47d7d95c02900191968b2e745649"},
-    #generator_urls = {
-    #"x86_64-unknown-linux-gnu": "https://realtimeroboticsgroup.org/build-dependencies/cargo-bazel-x86_64-unknown-linux-gnu",
-    #},
     lockfile = "//third_party/cargo:cxxbridge-cmd/Cargo.Bazel.lock",
     manifests = ["@cxxbridge-cmd//:Cargo.toml"],
     rust_toolchain_cargo_template = "@rust__{triple}__{channel}_tools//:bin/{tool}",
     rust_toolchain_rustc_template = "@rust__{triple}__{channel}_tools//:bin/{tool}",
-    rust_version = "1.70.0",
+    rust_version = "1.81.0",
     supported_platform_triples = [
         "x86_64-unknown-linux-gnu",
         "arm-unknown-linux-gnueabi",
@@ -834,4 +709,182 @@ http_archive(
     build_file = "@aos//debian:aws_sdk.BUILD",
     sha256 = "08856b91139d209f7423e60dd8f74a14ab6d053ca40088fcb42fd02484003e95",
     url = "https://realtimeroboticsgroup.org/build-dependencies/aws_sdk-1.11.321.tar.gz",
+)
+
+http_archive(
+    name = "snappy",
+    sha256 = "90f74bc1fbf78a6c56b3c4a082a05103b3a56bb17bca1a27e052ea11723292dc",
+    strip_prefix = "snappy-1.2.2",
+    url = "https://github.com/google/snappy/archive/refs/tags/1.2.2.tar.gz",
+)
+
+http_archive(
+    name = "rules_rust_tinyjson",
+    build_file = "@rules_rust//util/process_wrapper:BUILD.tinyjson.bazel",
+    sha256 = "1a8304da9f9370f6a6f9020b7903b044aa9ce3470f300a1fba5bc77c78145a16",
+    strip_prefix = "tinyjson-2.3.0",
+    type = "tar.gz",
+    url = "https://crates.io/api/v1/crates/tinyjson/2.3.0/download",
+)
+
+http_archive(
+    name = "aspect_rules_js",
+    sha256 = "b71565da7a811964e30cccb405544d551561e4b56c65f0c0aeabe85638920bd6",
+    strip_prefix = "rules_js-2.4.2",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.4.2/rules_js-v2.4.2.tar.gz",
+)
+
+http_archive(
+    name = "aspect_rules_rollup",
+    sha256 = "0b8ac7d97cd660eb9a275600227e9c4268f5904cba962939d1a6ce9a0a059d2e",
+    strip_prefix = "rules_rollup-2.0.1",
+    url = "https://github.com/aspect-build/rules_rollup/releases/download/v2.0.1/rules_rollup-v2.0.1.tar.gz",
+)
+
+load("@aspect_rules_rollup//rollup:dependencies.bzl", "rules_rollup_dependencies")
+
+rules_rollup_dependencies()
+
+load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+
+rules_js_dependencies()
+
+http_archive(
+    name = "aspect_rules_esbuild",
+    sha256 = "530adfeae30bbbd097e8af845a44a04b641b680c5703b3bf885cbd384ffec779",
+    strip_prefix = "rules_esbuild-0.22.1",
+    url = "https://github.com/aspect-build/rules_esbuild/releases/download/v0.22.1/rules_esbuild-v0.22.1.tar.gz",
+)
+
+http_archive(
+    name = "aspect_rules_terser",
+    sha256 = "c2013d66903fa42047b3bebeb4fc4a16ba380c310f772d8b28aaf8b5af6a1032",
+    strip_prefix = "rules_terser-2.0.1",
+    url = "https://github.com/aspect-build/rules_terser/releases/download/v2.0.1/rules_terser-v2.0.1.tar.gz",
+)
+
+load("@aspect_rules_esbuild//esbuild:dependencies.bzl", "rules_esbuild_dependencies")
+
+rules_esbuild_dependencies()
+
+load("@aspect_rules_js//js:toolchains.bzl", "DEFAULT_NODE_VERSION", "rules_js_register_toolchains")
+
+rules_js_register_toolchains(node_version = DEFAULT_NODE_VERSION)
+
+load("@aspect_rules_terser//terser:dependencies.bzl", "rules_terser_dependencies")
+
+rules_terser_dependencies()
+
+http_archive(
+    name = "aspect_rules_ts",
+    sha256 = "09af62a0d46918d815b5f48b5ed0f5349b62c15fc42fcc3fef5c246504ff8d99",
+    strip_prefix = "rules_ts-3.6.3",
+    url = "https://github.com/aspect-build/rules_ts/releases/download/v3.6.3/rules_ts-v3.6.3.tar.gz",
+)
+
+load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies")
+
+rules_ts_dependencies(
+    ts_version_from = "@aos//:package.json",
+)
+
+load("@aspect_rules_js//npm:repositories.bzl", "npm_translate_lock")
+
+npm_translate_lock(
+    name = "npm",
+    data = [
+        "@aos//:package.json",
+        "@aos//:pnpm-workspace.yaml",
+        "@aos//aos/analysis/foxglove_extension:package.json",
+        "@aos//control_loops/swerve/spline_ui/www:package.json",
+    ],
+
+    # Running lifecycle hooks on npm package fsevents@2.3.2 fails in a dramatic way:
+    # ```
+    # SyntaxError: Unexpected strict mode reserved word
+    # at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:117:18)
+    # at ESMLoader.moduleProvider (node:internal/modules/esm/loader:337:14)
+    # at async link (node:internal/modules/esm/module_job:70:21)
+    # ```
+    lifecycle_hooks_no_sandbox = False,
+    npmrc = "@aos//:.npmrc",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    quiet = False,
+    update_pnpm_lock = False,
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+
+load("@aspect_rules_esbuild//esbuild:repositories.bzl", "LATEST_ESBUILD_VERSION", "esbuild_register_toolchains")
+
+esbuild_register_toolchains(
+    name = "esbuild",
+    esbuild_version = LATEST_ESBUILD_VERSION,
+)
+
+load("@npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
+
+http_archive(
+    name = "aspect_rules_cypress",
+    patch_args = ["-p1"],
+    patches = [
+        "@aos//third_party:rules_cypress/0001-fix-incorrect-linux-checksums.patch",
+        "@aos//third_party:rules_cypress/0002-Add-support-for-cypress-13.6.6.patch",
+    ],
+    sha256 = "76947778d8e855eee3c15931e1fcdc1c2a25d56d6c0edd110b2227c05b794d08",
+    strip_prefix = "rules_cypress-0.3.2",
+    urls = [
+        "https://github.com/aspect-build/rules_cypress/archive/refs/tags/v0.3.2.tar.gz",
+    ],
+)
+
+load("@aspect_rules_cypress//cypress:dependencies.bzl", "rules_cypress_dependencies")
+load("@aspect_rules_cypress//cypress:repositories.bzl", "cypress_register_toolchains")
+
+rules_cypress_dependencies()
+
+cypress_register_toolchains(
+    name = "cypress",
+    cypress_version = "13.3.1",
+)
+
+load("@com_github_google_flatbuffers//ts:repositories.bzl", "flatbuffers_npm")
+
+flatbuffers_npm(
+    name = "flatbuffers_npm",
+)
+
+load("@flatbuffers_npm//:repositories.bzl", fbs_npm_repositories = "npm_repositories")
+
+fbs_npm_repositories()
+
+local_repository(
+    name = "com_github_rawrtc_re",
+    path = "../aos/third_party/rawrtc/re",     
+)                                                    
+                                                  
+local_repository(                          
+    name = "com_github_rawrtc_rew",    
+    path = "../aos/third_party/rawrtc/rew", 
+)
+                                                                              
+local_repository(
+    name = "com_github_rawrtc_usrsctp",
+    path = "../aos/third_party/rawrtc/usrsctp",
+)
+
+local_repository(                                                                     
+    name = "com_github_rawrtc_rawrtc_common",
+    path = "../aos/third_party/rawrtc/rawrtc-common",
+)
+             
+local_repository(       
+    name = "com_github_rawrtc_rawrtc_data_channel",                   
+    path = "../aos/third_party/rawrtc/rawrtc-data-channel",                                                      
+)
+
+local_repository(                                                                                      
+    name = "com_github_rawrtc_rawrtc", 
+    path = "../aos/third_party/rawrtc/rawrtc", 
 )

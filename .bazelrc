@@ -16,7 +16,6 @@ build --tool_java_language_version=21
 build --tool_java_runtime_version=remotejdk_21
 
 test --test_output=errors
-test --test_verbose_timeout_warnings
 
 import %workspace%/shared/bazel/compiler_flags/sanitizers.rc
 import %workspace%/shared/bazel/compiler_flags/linux_flags.rc
@@ -62,7 +61,9 @@ build:ci --remote_download_minimal
 
 build --build_metadata=REPO_URL=https://github.com/wpilibsuite/allwpilib.git
 
-common --define="WPILIB_VERSION=2025.424242.3.1-unknown"
+common --define="WPILIB_VERSION=2027.424242.0.0-alpha-2-20250803224830-192-gf59e65e-dirty"
+common:linux --repo_env=BAZEL_LINKOPTS="-rdynamic:-pthread:-ldl:-Wl,-rpath,'$ORIGIN':-fuse-ld=bfd"
+common:linux --features=-supports_start_end_lib --host_features=-supports_start_end_lib
 
 # List of artifact types to build in CI.
 # Anything else gets skipped to speed up CI.
@@ -72,3 +73,23 @@ common:ci --repo_env="WPI_PUBLISH_CLASSIFIER_FILTER=headers,sources,linuxsystemc
 # Instead, skip the cross transition for ARM on x86, and the reverse on x86.
 common:ci_windows_x86 --repo_env="WPI_PUBLISH_CLASSIFIER_FILTER=headers,sources,linuxsystemcore,linuxsystemcoredebug,linuxsystemcorestatic,linuxsystemcorestaticdebug,linuxx86-64,linuxx86-64debug,linuxx86-64static,linuxx86-64staticdebug,osxuniversal,osxuniversaldebug,osxuniversalstatic,osxuniversalstaticdebug,windowsx86-64,windowsx86-64debug,windowsx86-64static,windowsx86-64staticdebug"
 common:ci_windows_arm --repo_env="WPI_PUBLISH_CLASSIFIER_FILTER=headers,sources,linuxsystemcore,linuxsystemcoredebug,linuxsystemcorestatic,linuxsystemcorestaticdebug,linuxx86-64,linuxx86-64debug,linuxx86-64static,linuxx86-64staticdebug,osxuniversal,osxuniversaldebug,osxuniversalstatic,osxuniversalstaticdebug,windowsarm64,windowsarm64debug,windowsarm64static,windowsarm64staticdebug"
+common --incompatible_disallow_empty_glob
+
+# Honor the setting of `skipLibCheck` in the tsconfig.json file.
+# https://www.typescriptlang.org/tsconfig#skipLibCheck
+build --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+fetch --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+query --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+
+# Use "tsc" as the transpiler when ts_project has no `transpiler` set.
+# For now this is an acceptable default, but it would be nice to switch to swc in the future.
+# https://docs.aspect.build/rulesets/aspect_rules_ts/docs/transpiler/
+build --@aspect_rules_ts//ts:default_to_tsc_transpiler
+fetch --@aspect_rules_ts//ts:default_to_tsc_transpiler
+query --@aspect_rules_ts//ts:default_to_tsc_transpiler
+
+# Disable warnings about using directories in Bazel.
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
+build --show_result 5
+test --test_output=errors --test_timeout=-1,-1,-1,5500
