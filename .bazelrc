@@ -93,3 +93,6 @@ startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
 build --show_result 5
 test --test_output=errors --test_timeout=-1,-1,-1,5500
+
+build --@rules_python//python/config_settings:bootstrap_impl=script
+build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
