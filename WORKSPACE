@@ -204,6 +204,9 @@ http_archive(
     ],
 )
 
+# This gives us a repository layout which matches what normal BCR modules expect.
+# The goal here is to make it easier to depend on external projects which already
+# include @eigen without introducing multiple eigen versions.
 local_repository(
     name = "eigen",
     path = "wpimath/src/main/native/thirdparty/eigen/include/",
