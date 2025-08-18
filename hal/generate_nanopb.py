@@ -17,10 +17,13 @@ def generate_nanopb(nanopb: Path, output_directory: Path, proto_dir: Path):
     os.makedirs(output_directory.absolute())
 
     proto_files = proto_dir.glob("*.proto")
+    env = {x: os.environ[x] for x in ["TMPDIR", "PATH"] if x in os.environ}
+
     for path in proto_files:
         absolute_filename = path.absolute()
         subprocess.check_call(
-            [
+            ([sys.executable] if nanopb.endswith(".py") else [])
+            + [
                 nanopb,
                 f"-I{absolute_filename.parent}",
                 f"-D{output_directory.absolute()}",
@@ -28,7 +31,7 @@ def generate_nanopb(nanopb: Path, output_directory: Path, proto_dir: Path):
                 "-e.npb",
                 absolute_filename,
             ],
-            env={"TMPDIR": os.environ["TMPDIR"]},
+            env=env,
         )
     java_files = (output_directory).glob("*")
     for java_file in java_files:
