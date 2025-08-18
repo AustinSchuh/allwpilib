@@ -1,5 +1,9 @@
-#ifndef FRC_CAN_LOGGER_CAN_LOGGER_H_
-#define FRC_CAN_LOGGER_CAN_LOGGER_H_
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+#ifndef WPILIB_CAN_CAN_LOGGER_H_
+#define WPILIB_CAN_CAN_LOGGER_H_
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
@@ -26,12 +30,12 @@ class CanLogger {
   static constexpr std::chrono::milliseconds kPollPeriod =
       std::chrono::milliseconds(100);
 
-  CanLogger(aos::ShmEventLoop *event_loop,
+  CanLogger(aos::ShmEventLoop* event_loop,
             std::string_view channel_name = "/can",
             std::string_view interface_name = "can0");
 
-  CanLogger(const CanLogger &) = delete;
-  CanLogger &operator=(const CanLogger &) = delete;
+  CanLogger(const CanLogger&) = delete;
+  CanLogger& operator=(const CanLogger&) = delete;
 
   ~CanLogger() { shm_event_loop_->epoll()->DeleteFd(fd_.get()); }
 
@@ -42,11 +46,11 @@ class CanLogger {
   // Returns true if successful and false if the recieve buffer is empty.
   bool ReadFrame();
 
-  aos::ShmEventLoop *shm_event_loop_;
+  aos::ShmEventLoop* shm_event_loop_;
   aos::ScopedFD fd_;
   aos::Sender<CanFrame> frames_sender_;
 };
 
 }  // namespace frc::can_logger
 
-#endif  // FRC_CAN_LOGGER_CAN_LOGGER_H_
+#endif  // WPILIB_CAN_CAN_LOGGER_H_
