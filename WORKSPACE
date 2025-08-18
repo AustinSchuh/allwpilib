@@ -51,9 +51,9 @@ http_archive(
 # Rules Python
 http_archive(
     name = "rules_python",
-    sha256 = "9f9f3b300a9264e4c77999312ce663be5dee9a56e361a1f6fe7ec60e1beef9a3",
-    strip_prefix = "rules_python-1.4.1",
-    url = "https://github.com/bazel-contrib/rules_python/releases/download/1.4.1/rules_python-1.4.1.tar.gz",
+    sha256 = "0a1cefefb4a7b550fb0b43f54df67d6da95b7ba352637669e46c987f69986f6a",
+    strip_prefix = "rules_python-1.5.3",
+    url = "https://github.com/bazel-contrib/rules_python/releases/download/1.5.3/rules_python-1.5.3.tar.gz",
 )
 
 # Download Extra java rules
@@ -699,25 +699,6 @@ load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
 
-# This one is tricky to get an archive because it has recursive submodules. These semi-automated steps do work though:
-# git clone -b 1.11.321 --recurse-submodules --depth=1 https://github.com/aws/aws-sdk-cpp
-# cd aws-sdk-cpp
-# echo bsdtar -a -cf aws_sdk-version.tar.gz --ignore-zeros @\<\(git archive HEAD\) $(git submodule foreach --recursive --quiet 'echo @\<\(cd $displaypath \&\& git archive HEAD --prefix=$displaypath/\)')
-# Now run the command that printed, and the output will be at aws_sdk-version.tar.gz.
-http_archive(
-    name = "aws_sdk",
-    build_file = "@aos//debian:aws_sdk.BUILD",
-    sha256 = "08856b91139d209f7423e60dd8f74a14ab6d053ca40088fcb42fd02484003e95",
-    url = "https://realtimeroboticsgroup.org/build-dependencies/aws_sdk-1.11.321.tar.gz",
-)
-
-http_archive(
-    name = "snappy",
-    sha256 = "90f74bc1fbf78a6c56b3c4a082a05103b3a56bb17bca1a27e052ea11723292dc",
-    strip_prefix = "snappy-1.2.2",
-    url = "https://github.com/google/snappy/archive/refs/tags/1.2.2.tar.gz",
-)
-
 http_archive(
     name = "rules_rust_tinyjson",
     build_file = "@rules_rust//util/process_wrapper:BUILD.tinyjson.bazel",
@@ -859,32 +840,16 @@ load("@flatbuffers_npm//:repositories.bzl", fbs_npm_repositories = "npm_reposito
 
 fbs_npm_repositories()
 
-local_repository(
-    name = "com_github_rawrtc_re",
-    path = "../aos/third_party/rawrtc/re",     
-)                                                    
-                                                  
-local_repository(                          
-    name = "com_github_rawrtc_rew",    
-    path = "../aos/third_party/rawrtc/rew", 
-)
-                                                                              
-local_repository(
-    name = "com_github_rawrtc_usrsctp",
-    path = "../aos/third_party/rawrtc/usrsctp",
+# Shamelessly stolen from https://github.com/bazelbuild/bazel-central-registry/blob/main/modules/xz/5.4.5.bcr.5
+http_archive(
+    name = "xz",
+    integrity = "sha256-E1yQuTSu6PvA1Gfeh6Bctw1ifaNqvlGMNXqHNwnlt9Y=",
+    patch_args = ["-p1"],
+    patches = ["//:thirdparty/xz/bzlmod.patch"],
+    strip_prefix = "xz-5.4.5",
+    url = "https://github.com/tukaani-project/xz/releases/download/v5.4.5/xz-5.4.5.tar.gz",
 )
 
-local_repository(                                                                     
-    name = "com_github_rawrtc_rawrtc_common",
-    path = "../aos/third_party/rawrtc/rawrtc-common",
-)
-             
-local_repository(       
-    name = "com_github_rawrtc_rawrtc_data_channel",                   
-    path = "../aos/third_party/rawrtc/rawrtc-data-channel",                                                      
-)
+load("@aos//:repositories.bzl", aos_repositories = "repositories")
 
-local_repository(                                                                                      
-    name = "com_github_rawrtc_rawrtc", 
-    path = "../aos/third_party/rawrtc/rawrtc", 
-)
+aos_repositories()
