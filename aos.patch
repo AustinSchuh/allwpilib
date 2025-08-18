@@ -1,0 +1,93 @@
+diff --git a/aos/ipc_lib/BUILD b/aos/ipc_lib/BUILD
+index cf787baf9..0ea96e710 100644
+--- a/aos/ipc_lib/BUILD
++++ b/aos/ipc_lib/BUILD
+@@ -101,6 +101,7 @@ cc_binary(
+     ],
+     linkopts = ["-lrt"],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":event",
+         "//aos:condition",
+@@ -444,6 +445,7 @@ cc_binary(
+         "signal_stress.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
+@@ -458,6 +460,7 @@ cc_binary(
+         "futex_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:condition",
+@@ -473,6 +476,7 @@ cc_binary(
+         "named_pipe_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
+@@ -487,6 +491,7 @@ cc_binary(
+         "eventfd_latency.cc",
+     ],
+     target_compatible_with = ["@platforms//os:linux"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":latency_lib",
+         "//aos:init",
+diff --git a/third_party/BUILD b/third_party/BUILD
+index 355321ef1..ff765e55a 100644
+--- a/third_party/BUILD
++++ b/third_party/BUILD
+@@ -74,19 +74,21 @@ cc_library(
+ cc_library(
+     name = "gstreamer",
+     visibility = ["//visibility:public"],
+-    deps = select({
+-        "//tools:cpu_k8": [
+-            "@amd64_debian_sysroot//:gstreamer-1.0",
+-            "@amd64_debian_sysroot//:gstreamer-app-1.0",
+-            "@amd64_debian_sysroot//:gstreamer-webrtc-1.0",
+-        ],
+-        "//tools:cpu_arm64": [
+-            "@arm64_debian_sysroot//:gstreamer-1.0",
+-            "@arm64_debian_sysroot//:gstreamer-app-1.0",
+-            "@arm64_debian_sysroot//:gstreamer-webrtc-1.0",
+-        ],
+-        "//conditions:default": [":unavailable"],
+-    }),
++    deps = [":unavailable"],
++    # TODO(austin): Add a platform property to mark gstreamer support.
++    #deps = select({
++    #    "//tools:cpu_k8": [
++    #        "@amd64_debian_sysroot//:gstreamer-1.0",
++    #        "@amd64_debian_sysroot//:gstreamer-app-1.0",
++    #        "@amd64_debian_sysroot//:gstreamer-webrtc-1.0",
++    #    ],
++    #    "//tools:cpu_arm64": [
++    #        "@arm64_debian_sysroot//:gstreamer-1.0",
++    #        "@arm64_debian_sysroot//:gstreamer-app-1.0",
++    #        "@arm64_debian_sysroot//:gstreamer-webrtc-1.0",
++    #    ],
++    #    "//conditions:default": [":unavailable"],
++    #}),
+ )
+ 
+ cc_library(
+diff --git a/third_party/diff-from-upstream.sh b/third_party/diff-from-upstream.sh
+index 373cc00be..7ba6aacc1 100755
+--- a/third_party/diff-from-upstream.sh
++++ b/third_party/diff-from-upstream.sh
+@@ -52,4 +52,5 @@ fi
+ set ${SPLIT}
+ SQUASHED_UPSTREAM=$1
+ 
++set -x
+ git diff ${DIFF_ARGS} ${SQUASHED_UPSTREAM}..HEAD:${DIR}

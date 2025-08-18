@@ -526,17 +526,41 @@ doxygen_repository(
     ],
 )
 
-local_repository(
+http_archive(
     name = "aos",
-    path = "/home/austin/local/aos/",
+    patch_args = ["-p1"],
+    patches = [
+        "//:aos.patch",
+    ],
     repo_mapping = {
         "@pip_deps": "@allwpilib_pip_deps",
     },
+    sha256 = "d410d90d922094c637f3b5a42363c1d8a5fe5f6263e41e68144d88ea478e1e84",
+    strip_prefix = "aos-55869cb48cf27a0273fdae4ef278049f83326949",
+    url = "https://github.com/AustinSchuh/aos/archive/55869cb48cf27a0273fdae4ef278049f83326949.tar.gz",
 )
 
-local_repository(
+#local_repository(
+#name = "aos",
+#path = "/home/austin/local/aos/",
+#repo_mapping = {
+#"@pip_deps": "@allwpilib_pip_deps",
+#},
+#)
+
+#local_repository(
+#name = "com_github_google_flatbuffers",
+#path = "/home/austin/local/aos/third_party/flatbuffers/",
+#)
+
+http_archive(
     name = "com_github_google_flatbuffers",
-    path = "/home/austin/local/aos/third_party/flatbuffers/",
+    repo_mapping = {
+        "@pip_deps": "@allwpilib_pip_deps",
+    },
+    sha256 = "d410d90d922094c637f3b5a42363c1d8a5fe5f6263e41e68144d88ea478e1e84",
+    strip_prefix = "aos-55869cb48cf27a0273fdae4ef278049f83326949/third_party/flatbuffers",
+    url = "https://github.com/AustinSchuh/aos/archive/55869cb48cf27a0273fdae4ef278049f83326949.tar.gz",
 )
 
 http_archive(

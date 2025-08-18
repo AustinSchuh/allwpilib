@@ -1,0 +1,81 @@
+load("@aos//aos:config.bzl", "aos_config")
+load("@aos//aos/flatbuffers:generate.bzl", "static_flatbuffer")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+aos_config(
+    name = "aos_config",
+    src = "aos_config_source.json",
+    flatbuffers = [
+        ":can_logging_fbs",
+        "@aos//aos/events:event_loop_fbs",
+        "@aos//documentation/examples/ping_pong:ping_fbs",
+        "@aos//documentation/examples/ping_pong:pong_fbs",
+        "@aos//aos/logging:dynamic_log_command_fbs",
+        "@aos//aos/logging:log_message_fbs",
+    ],
+)
+
+cc_binary(
+    name = "can_logger",
+    srcs = [
+        "can_logger_main.cc",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":can_logger_lib",
+        "@aos//aos:init",
+        "@aos//aos/events:shm_event_loop",
+        "@aos//aos/time",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
+cc_library(
+    name = "can_logger_lib",
+    srcs = [
+        "can_logger.cc",
+        "can_logger.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":can_logging_fbs",
+        "@aos//aos/events:shm_event_loop",
+        "@aos//aos/scoped:scoped_fd",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
+static_flatbuffer(
+    name = "can_logging_fbs",
+    srcs = [
+        "can_logging.fbs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "example",
+    srcs = [
+        ":aos_config",
+        ":can_logger",
+        "@aos//aos:aos_dump",
+        "@aos//aos:aos_send",
+        "@aos//aos/events:aos_timing_report_streamer",
+        "@aos//documentation/examples/ping_pong:ping",
+        "@aos//documentation/examples/ping_pong:pong",
+        # This is pretty old, haven't played around with it.
+        "@aos//aos/ipc_lib:ipc_comparison",
+        # Haven't dug in recently, but these were used to design AOS' IPC mechanism.
+        "@aos//aos/ipc_lib:signal_stress",
+        "@aos//aos/ipc_lib:futex_latency",
+        "@aos//aos/ipc_lib:named_pipe_latency",
+        "@aos//aos/ipc_lib:eventfd_latency",
+        "@aos//aos/starter:irq_affinity",
+        "@aos//aos/util:foxglove_websocket",
+    ],
+)
