@@ -1,9 +1,23 @@
+load("@allwpilib_npm//:defs.bzl", "npm_link_all_packages")
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@aspect_rules_js//npm:defs.bzl", "npm_link_package")
 load("@rules_java//java:java_binary.bzl", "java_binary")
 load("@rules_pkg//:mappings.bzl", "pkg_files")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("//shared/bazel/rules:publishing.bzl", "publish_all")
 load("//shared/bazel/rules/robotpy:compatibility_select.bzl", "robotpy_compatibility_select")
+
+npm_link_all_packages(name = "node_modules")
+
+npm_link_package(
+    name = "node_modules/flatbuffers",
+    src = "@com_github_google_flatbuffers//ts:flatbuffers",
+)
+
+npm_link_package(
+    name = "node_modules/flatbuffers_reflection",
+    src = "@com_github_google_flatbuffers//reflection:flatbuffers_reflection",
+)
 
 exports_files([
     "LICENSE.md",

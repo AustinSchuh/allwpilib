@@ -88,3 +88,23 @@ build --@rules_python//python/config_settings:bootstrap_impl=script
 build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
 
 try-import %workspace%/bazel_auth.rc
+
+common --noincompatible_disallow_empty_glob
+
+# Honor the setting of `skipLibCheck` in the tsconfig.json file.
+# https://www.typescriptlang.org/tsconfig#skipLibCheck
+build --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+fetch --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+query --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+
+# Use "tsc" as the transpiler when ts_project has no `transpiler` set.
+# For now this is an acceptable default, but it would be nice to switch to swc in the future.
+# https://docs.aspect.build/rulesets/aspect_rules_ts/docs/transpiler/
+build --@aspect_rules_ts//ts:default_to_tsc_transpiler
+fetch --@aspect_rules_ts//ts:default_to_tsc_transpiler
+query --@aspect_rules_ts//ts:default_to_tsc_transpiler
+
+common --registry=file:///home/austin/local/aos/registry
+common --registry=https://bcr.bazel.build
+
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1

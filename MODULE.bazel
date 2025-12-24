@@ -24,6 +24,15 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_java", version = "9.3.0")
 bazel_dep(name = "rules_python", version = "1.7.0")
 
+single_version_override(
+    module_name = "rules_python",
+    patch_strip = 1,
+    patches = [
+        "//third_party:rules_python/0004-aos-ci-pip-config.patch",
+    ],
+    version = "1.7.0",
+)
+
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
     python_version = "3.10",
@@ -112,6 +121,8 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 http_file(
     name = "quickbuffer_protoc_linux",
     executable = True,
@@ -156,3 +167,59 @@ http_jar(
     integrity = "sha256-IHW6y6WXJFjX9RYD+IwVAMwAbEo36fLqonIKR+FaqpQ=",
     urls = ["https://github.com/google/copybara/releases/download/v20251027/copybara_deploy.jar"],
 )
+
+bazel_dep(name = "aos", version = "0.0.0")
+local_path_override(
+    module_name = "aos",
+    path = "../aos",
+)
+
+bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
+local_path_override(
+    module_name = "flatbuffers",
+    path = "../aos/third_party/flatbuffers",
+)
+
+git_override(
+    module_name = "bazel_iwyu",
+    commit = "85cbd99369a3ed3f8c31234d2d887026f3e66bbc",
+    remote = "https://github.com/storypku/bazel_iwyu.git",
+)
+
+bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
+
+bazel_dep(name = "abseil-cpp", version = "20250512.1", repo_name = "com_google_absl")
+single_version_override(
+    module_name = "abseil-cpp",
+    patch_strip = 1,
+    patches = [
+        "//third_party/abseil:0001-Add-hooks-for-using-abseil-with-AOS.patch",
+        "//third_party/abseil:0002-Suppress-the-stack-trace-on-SIGABRT.patch",
+        "//third_party/abseil:0004-Remove-relocatability-test-that-is-no-longer-useful.patch",
+    ],
+    version = "20250512.1",
+)
+
+rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
+rules_ts_ext.deps(
+    ts_version_from = "//:package.json",
+)
+use_repo(rules_ts_ext, "npm_typescript")
+
+publishing_repo = use_repo_rule("//shared/bazel/rules:publishing_rule.bzl", "publishing_repo")
+
+publishing_repo(
+    name = "com_wpilib_allwpilib_publishing_config",
+)
+
+bazel_dep(name = "aspect_rules_js", version = "2.4.2")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+
+npm.npm_translate_lock(
+    name = "allwpilib_npm",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+
+use_repo(npm, "allwpilib_npm")
