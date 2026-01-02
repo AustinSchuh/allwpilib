@@ -261,3 +261,6 @@ bazel_auth.rc
 
 # Copybara user config
 shared/bazel/copybara/.copybara.json
+
+node_modules
+/.aspect

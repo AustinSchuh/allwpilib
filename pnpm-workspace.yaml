@@ -1,0 +1,3 @@
+packages:
+- frc/control_loops/swerve/spline_ui/www
+- aos/analysis/foxglove_extension

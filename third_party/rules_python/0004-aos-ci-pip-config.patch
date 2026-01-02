@@ -1,0 +1,55 @@
+diff --git a/python/private/pypi/hub_builder.bzl b/python/private/pypi/hub_builder.bzl
+index 522d67e..afc8a25 100644
+--- a/python/private/pypi/hub_builder.bzl
++++ b/python/private/pypi/hub_builder.bzl
+@@ -380,6 +380,11 @@
+     """
+     logger = self._logger
+     platforms = self._platforms[pip_attr.python_version]
++
++    extra_pip_args = pip_attr.extra_pip_args
++    if module_ctx.os.environ.get("AOS_RUNNING_IN_CI") == "1" and pip_attr.extra_pip_args_ci:
++        extra_pip_args = pip_attr.extra_pip_args_ci
++
+     requirements_by_platform = parse_requirements(
+         module_ctx,
+         requirements_by_platform = requirements_files_by_platform(
+@@ -388,7 +393,7 @@
+             requirements_lock = pip_attr.requirements_lock,
+             requirements_osx = pip_attr.requirements_darwin,
+             requirements_windows = pip_attr.requirements_windows,
+-            extra_pip_args = pip_attr.extra_pip_args,
++            extra_pip_args = extra_pip_args,
+             platforms = sorted(platforms),  # here we only need keys
+             python_version = full_version(
+                 version = pip_attr.python_version,
+@@ -397,7 +402,7 @@
+             logger = logger,
+         ),
+         platforms = platforms,
+-        extra_pip_args = pip_attr.extra_pip_args,
++        extra_pip_args = extra_pip_args,
+         get_index_urls = self._get_index_urls.get(pip_attr.python_version),
+         evaluate_markers = _evaluate_markers(self, pip_attr),
+         logger = logger,
+diff --git a/python/private/pypi/extension.bzl b/python/private/pypi/extension.bzl
+index 522d67e..afc8a25 100644
+--- a/python/private/pypi/extension.bzl
++++ b/python/private/pypi/extension.bzl
+@@ -548,6 +548,7 @@
+         A dict of attributes.
+     """
+     attrs = dict({
++        "extra_pip_args_ci": attr.string_list(doc = "CI args override"),
+         "experimental_extra_index_urls": attr.string_list(
+             doc = """\
+ The extra index URLs to use for downloading wheels using bazel downloader.
+@@ -834,6 +835,7 @@
+ """,
+         ),
+     },
++    environ = ["AOS_RUNNING_IN_CI"],
+ )
+ 
+ def _whl_mods_repo_impl(rctx):
+
