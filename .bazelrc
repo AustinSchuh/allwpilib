@@ -46,6 +46,22 @@ build:common_cache --remote_timeout=3600
 build:common_cache --remote_cache_compression
 build:common_cache --experimental_remote_cache_compression_threshold=100
 
+build:linux --strategy=TsProject=remote,sandboxed
+build --strategy=CopyFile=remote,standalone
+build --strategy=CopyDirectory=remote,standalone
+build --strategy=CopyToDirectory=remote,standalone
+build:linux --strategy=NpmLifecycleHook=remote,sandboxed,standalone
+
+common:common_cache --experimental_remote_merkle_tree_cache
+common:remote --config=common_cache
+build:remote --incompatible_strict_action_env --experimental_inmemory_dotd_files --experimental_inmemory_jdeps_files --experimental_remote_merkle_tree_cache --incompatible_allow_tags_propagation
+build:remote --remote_executor=grpcs://engflow.spacecookies.dev --bes_backend=grpcs://engflow.spacecookies.dev --bes_results_url=https://engflow.spacecookies.dev/invocation/
+build:remote --jobs=100
+build:remote --remote_timeout=1500
+build:remote --spawn_strategy=remote,sandboxed
+build:remote --grpc_keepalive_time=30s
+
+
 # Build Buddy Cache Setup
 build:build_buddy --config=common_cache
 build:build_buddy --config=build_buddy_bes

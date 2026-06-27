@@ -18,3 +18,5 @@ wpinet/bin
 wpiutil/bin
 wpiunits/bin
 xrpVendordep/bin
+third_party/aos_patches
+
