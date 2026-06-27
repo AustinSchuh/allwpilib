@@ -4,8 +4,6 @@ common --enable_bzlmod --enable_workspace
 # Resolves to --config=linux on Linux, --config=macos on Mac, --windows on windows
 common --enable_platform_specific_config
 
-common --cxxopt="-std=c++20" --host_cxxopt="-std=c++20"
-
 # Make bazel 8 work for us.
 build --experimental_cc_static_library
 build --experimental_cc_shared_library
@@ -44,6 +42,7 @@ build:linux --strategy=TsProject=remote,sandboxed
 build --strategy=CopyFile=remote,standalone
 build --strategy=CopyDirectory=remote,standalone
 build --strategy=CopyToDirectory=remote,standalone
+build --strategy=TestRunner=remote,sandboxed,standalone
 build:linux --strategy=NpmLifecycleHook=remote,sandboxed,standalone
 
 common:common_cache --experimental_remote_merkle_tree_cache

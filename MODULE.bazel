@@ -113,6 +113,10 @@ bazel_dep(name = "wpilib_toolchains", version = "")
 archive_override(
     module_name = "wpilib_toolchains",
     integrity = "sha256-4c3CfQWaDQHnYDREDpaKzy6EvPMSs4SnvYrgbGi9Q4I=",
+    patch_strip = 1,
+    patches = [
+        "third_party/aos_patches/wpilib_toolchains/0001-add-shebang-and-debugging.patch",
+    ],
     urls = ["https://github.com/wpilibsuite/rules_bzlmodrio_toolchains/releases/download/2027-1/wpilib_toolchains-2027-1.tar.gz"],
 )
 
@@ -161,17 +165,17 @@ archive_override(
     urls = ["https://github.com/bazel-contrib/rules_cuda/archive/345dd02d2b64b8a6c138800da3180c9278417ec2.tar.gz"],
 )
 
-single_version_override(
-    module_name = "rules_python",
-    patch_strip = 1,
-    patches = [
-        "third_party/aos_patches/rules_python/0001-Allow-WORKSPACE-users-to-patch-wheels.patch",
-        "third_party/aos_patches/rules_python/0002-Allow-users-to-inject-extra-deps.patch",
-        "third_party/aos_patches/rules_python/0003-Add-sysroot-dep.patch",
-        "third_party/aos_patches/rules_python/0004-aos-ci-pip-config.patch",
-    ],
-    version = "1.5.3",
-)
+#single_version_override(
+    #module_name = "rules_python",
+    #patch_strip = 1,
+    #patches = [
+        #"third_party/aos_patches/rules_python/0001-Allow-WORKSPACE-users-to-patch-wheels.patch",
+        #"third_party/aos_patches/rules_python/0002-Allow-users-to-inject-extra-deps.patch",
+        #"third_party/aos_patches/rules_python/0003-Add-sysroot-dep.patch",
+        #"third_party/aos_patches/rules_python/0004-aos-ci-pip-config.patch",
+    #],
+    #version = "1.5.3",
+#)
 
 single_version_override(
     module_name = "glib",
