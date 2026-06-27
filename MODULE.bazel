@@ -4,23 +4,21 @@ module(
 )
 
 include("//docs:doxygen.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/ceres:ceres.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/libssh:libssh.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/mrclib:mrclib.MODULE.bazel")
 
 bazel_dep(name = "apple_support", version = "2.0.0", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
-bazel_dep(name = "bazel_features", version = "1.33.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.14.0")
+bazel_dep(name = "bazel_features", version = "1.38.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.19.3")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_java", version = "8.16.1")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_java", version = "9.3.0")
 bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "rules_pycross", version = "0.8.1")
+#bazel_dep(name = "pybind11_bazel", version = "3.0.1")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
@@ -126,4 +124,48 @@ http_jar(
     name = "com_github_google_copybara",
     integrity = "sha256-IHW6y6WXJFjX9RYD+IwVAMwAbEo36fLqonIKR+FaqpQ=",
     urls = ["https://github.com/google/copybara/releases/download/v20251027/copybara_deploy.jar"],
+)
+
+bazel_dep(name = "aos")
+local_path_override(
+    module_name = "aos",
+    path = "../aos",
+)
+
+bazel_dep(name = "abseil-cpp", version = "20250814.1", repo_name = "com_google_absl")
+bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
+local_path_override(
+    module_name = "flatbuffers",
+    path = "../aos/third_party/flatbuffers/",
+)
+
+local_path_override(
+    module_name = "glib",
+    path = "../aos/third_party/glib",
+)
+
+archive_override(
+    module_name = "bazel_iwyu",
+    integrity = "sha256-hSVfFyScxUilHCpmgQ3dLDp97EG+aIgShO2EPQnA8lk=",
+    strip_prefix = "bazel_iwyu-85cbd99369a3ed3f8c31234d2d887026f3e66bbc",
+    urls = ["https://github.com/storypku/bazel_iwyu/archive/85cbd99369a3ed3f8c31234d2d887026f3e66bbc.tar.gz"],
+)
+
+archive_override(
+    module_name = "rules_cuda",
+    integrity = "sha256-BW9EQVIw+wY6CQqdBgfUNGFn18aNa/9HCVILEyqKj+Q=",
+    strip_prefix = "rules_cuda-345dd02d2b64b8a6c138800da3180c9278417ec2",
+    urls = ["https://github.com/bazel-contrib/rules_cuda/archive/345dd02d2b64b8a6c138800da3180c9278417ec2.tar.gz"],
+)
+
+single_version_override(
+    module_name = "rules_python",
+    patch_strip = 1,
+    patches = [
+        "//third_party:rules_python/0001-Allow-WORKSPACE-users-to-patch-wheels.patch",
+        "//third_party:rules_python/0002-Allow-users-to-inject-extra-deps.patch",
+        "//third_party:rules_python/0003-Add-sysroot-dep.patch",
+        "//third_party:rules_python/0004-aos-ci-pip-config.patch",
+    ],
+    version = "1.5.3",
 )

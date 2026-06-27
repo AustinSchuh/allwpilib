@@ -8,8 +8,8 @@ aos_config(
     flatbuffers = [
         ":can_logging_fbs",
         "@aos//aos/events:event_loop_fbs",
-        "@aos//aos/events:ping_fbs",
-        "@aos//aos/events:pong_fbs",
+        "@aos//aos/testing/ping_pong:ping_fbs",
+        "@aos//aos/testing/ping_pong:pong_fbs",
         "@aos//aos/logging:dynamic_log_command_fbs",
         "@aos//aos/logging:log_message_fbs",
     ],
@@ -20,6 +20,7 @@ cc_binary(
     srcs = [
         "can_logger_main.cc",
     ],
+    copts = ["-Wno-pedantic"],
     visibility = ["//visibility:public"],
     deps = [
         ":can_logger_lib",
@@ -38,6 +39,7 @@ cc_library(
         "can_logger.cc",
         "can_logger.h",
     ],
+    copts = ["-Wno-pedantic"],
     visibility = ["//visibility:public"],
     deps = [
         ":can_logging_fbs",
@@ -64,8 +66,8 @@ pkg_tar(
         "@aos//aos:aos_dump",
         "@aos//aos:aos_send",
         "@aos//aos/events:aos_timing_report_streamer",
-        "@aos//aos/events:ping",
-        "@aos//aos/events:pong",
+        "@aos//documentation/examples/ping_pong:ping",
+        "@aos//documentation/examples/ping_pong:pong",
         # This is pretty old, haven't played around with it.
         "@aos//aos/ipc_lib:ipc_comparison",
         # Haven't dug in recently, but these were used to design AOS' IPC mechanism.

@@ -7,7 +7,6 @@ common --enable_platform_specific_config
 common --cxxopt="-std=c++20" --host_cxxopt="-std=c++20"
 
 # Make bazel 8 work for us.
-common --enable_workspace
 build --experimental_cc_static_library
 build --experimental_cc_shared_library
 
@@ -94,3 +93,7 @@ try-import %workspace%/bazel_auth.rc
 
 build --per_file_copt=third_party.*,external.*@-Wno-pedantic
 build --host_per_file_copt=third_party.*,external.*@-Wno-pedantic
+
+common --registry=file://%workspace%/../aos/registry
+common --registry=https://bcr.bazel.build
+
