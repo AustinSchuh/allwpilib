@@ -165,59 +165,13 @@ archive_override(
     urls = ["https://github.com/bazel-contrib/rules_cuda/archive/345dd02d2b64b8a6c138800da3180c9278417ec2.tar.gz"],
 )
 
-#single_version_override(
-    #module_name = "rules_python",
-    #patch_strip = 1,
-    #patches = [
-        #"third_party/aos_patches/rules_python/0001-Allow-WORKSPACE-users-to-patch-wheels.patch",
-        #"third_party/aos_patches/rules_python/0002-Allow-users-to-inject-extra-deps.patch",
-        #"third_party/aos_patches/rules_python/0003-Add-sysroot-dep.patch",
-        #"third_party/aos_patches/rules_python/0004-aos-ci-pip-config.patch",
-    #],
-    #version = "1.5.3",
-#)
-
-single_version_override(
-    module_name = "glib",
-    patch_strip = 1,
-    patches = [
-        "third_party/aos_patches/glib/0001-Add-sysroot-select.patch",
-    ],
-    version = "2.82.2.bcr.7",
-)
-
-single_version_override(
-    module_name = "grpc",
-    patch_strip = 1,
-    patches = [
-        "third_party/aos_patches/grpc/0001-Fix-MSan-uninitialized-value-warnings-in-gRPC-s.patch",
-    ],
-    version = "1.81.0",
-)
-
-single_version_override(
-    module_name = "gazelle",
-    patch_strip = 1,
-    patches = ["third_party/aos_patches/bazel-gazelle/0001-Fix-visibility-of-gazelle-runner.patch"],
-    version = "0.51.3",
-)
-
-single_version_override(
-    module_name = "rules_go",
-    patch_strip = 1,
-    patches = [
-        "third_party/aos_patches/rules_go/0001-Disable-warnings-for-external-repositories.patch",
-    ],
-)
-
 single_version_override(
     module_name = "abseil-cpp",
     patch_strip = 1,
     patches = [
         "third_party/aos_patches/abseil/0001-Add-hooks-for-using-abseil-with-AOS.patch",
         "third_party/aos_patches/abseil/0002-Suppress-the-stack-trace-on-SIGABRT.patch",
-        "third_party/aos_patches/abseil/0005-Expose-google_benchmark-and-downgrade-dependencies.patch",
-        "third_party/aos_patches/abseil/0006-Suppress-MemorySanitizer-on-swisstable-uninit-reads.patch",
+        #"third_party/aos_patches/abseil/0005-Expose-google_benchmark-and-downgrade-dependencies.patch",
     ],
     version = "20260526.0",
 )
@@ -228,17 +182,6 @@ single_version_override(
     patches = ["third_party/aos_patches/googletest/0001-Expose-rules_python-dependency.patch"],
     version = "1.17.0.bcr.1",
 )
-
-single_version_override(
-    module_name = "xz",
-    patch_strip = 1,
-    patches = [
-        "third_party/aos_patches/xz/0001-Add-sysroot-select.patch",
-        "third_party/aos_patches/xz/0002-Add-ARMv7-support.patch",
-    ],
-    version = "5.4.5.bcr.7",
-)
-
 
 single_version_override(
     module_name = "websocketpp",
