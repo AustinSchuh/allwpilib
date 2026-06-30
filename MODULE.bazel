@@ -9,14 +9,14 @@ include("//shared/bazel/thirdparty/libssh:libssh.MODULE.bazel")
 include("//shared/bazel/thirdparty/mrclib:mrclib.MODULE.bazel")
 
 bazel_dep(name = "apple_support", version = "2.0.0", repo_name = "build_bazel_apple_support")
-bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "rules_cc", version = "0.2.18")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
-bazel_dep(name = "bazel_features", version = "1.38.0")
+bazel_dep(name = "bazel_features", version = "1.43.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.19.3")
-bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_java", version = "9.3.0")
-bazel_dep(name = "rules_python", version = "1.7.0")
+bazel_dep(name = "rules_python", version = "1.9.0")
 bazel_dep(name = "rules_pycross", version = "0.8.1")
 bazel_dep(name = "pybind11_bazel", version = "3.0.1")
 single_version_override(
@@ -160,19 +160,11 @@ local_path_override(
     path = "../aos/third_party/flatbuffers/",
 )
 
-
 archive_override(
     module_name = "bazel_iwyu",
     integrity = "sha256-hSVfFyScxUilHCpmgQ3dLDp97EG+aIgShO2EPQnA8lk=",
     strip_prefix = "bazel_iwyu-85cbd99369a3ed3f8c31234d2d887026f3e66bbc",
     urls = ["https://github.com/storypku/bazel_iwyu/archive/85cbd99369a3ed3f8c31234d2d887026f3e66bbc.tar.gz"],
-)
-
-archive_override(
-    module_name = "rules_cuda",
-    integrity = "sha256-BW9EQVIw+wY6CQqdBgfUNGFn18aNa/9HCVILEyqKj+Q=",
-    strip_prefix = "rules_cuda-345dd02d2b64b8a6c138800da3180c9278417ec2",
-    urls = ["https://github.com/bazel-contrib/rules_cuda/archive/345dd02d2b64b8a6c138800da3180c9278417ec2.tar.gz"],
 )
 
 single_version_override(
@@ -181,31 +173,6 @@ single_version_override(
     patches = [
         "third_party/aos_patches/abseil/0001-Add-hooks-for-using-abseil-with-AOS.patch",
         "third_party/aos_patches/abseil/0002-Suppress-the-stack-trace-on-SIGABRT.patch",
-        #"third_party/aos_patches/abseil/0005-Expose-google_benchmark-and-downgrade-dependencies.patch",
     ],
     version = "20260526.0",
 )
-
-single_version_override(
-    module_name = "googletest",
-    patch_strip = 1,
-    patches = ["third_party/aos_patches/googletest/0001-Expose-rules_python-dependency.patch"],
-    version = "1.17.0.bcr.1",
-)
-
-single_version_override(
-    module_name = "websocketpp",
-    patch_strip = 1,
-    patches = ["third_party/aos_patches/websocketpp/websocketpp.patch"],
-)
-
-archive_override(
-    module_name = "ceres-solver",
-    integrity = "sha256-vwvMeProhOWd2JNpPlJRDafMaGanRE/a6bqPGeriZs0=",
-    patch_strip = 1,
-    patches = ["third_party/aos_patches/ceres-bzlmod.patch"],
-    strip_prefix = "ceres-solver-0c70ed3a1a2d6ba47c06c7e8b3b040880bc474db",
-    urls = ["https://github.com/ceres-solver/ceres-solver/archive/0c70ed3a1a2d6ba47c06c7e8b3b040880bc474db.tar.gz"],
-)
-
-
