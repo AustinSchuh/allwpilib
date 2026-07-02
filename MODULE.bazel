@@ -153,9 +153,9 @@ http_jar(
 bazel_dep(name = "aos")
 archive_override(
     module_name = "aos",
-    integrity = "sha256-ZWpHyCaynbBs5gizeitYYlcS3QYi7r9DHdND6nNyy9g=",
-    strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade",
-    urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
+    integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
+    strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a",
+    urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
 )
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
@@ -163,9 +163,9 @@ bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_a
 bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
 archive_override(
     module_name = "flatbuffers",
-    integrity = "sha256-ZWpHyCaynbBs5gizeitYYlcS3QYi7r9DHdND6nNyy9g=",
-    strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade/third_party/flatbuffers",
-    urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
+    integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
+    strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a/third_party/flatbuffers",
+    urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
 )
 
 archive_override(
