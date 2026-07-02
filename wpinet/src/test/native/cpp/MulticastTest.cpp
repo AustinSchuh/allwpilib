@@ -38,9 +38,9 @@ TEST_CASE("MulticastServiceAnnouncerTest EmptyText",
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    // This assertion is disabled because mDNS multicast discovery is environment-dependent
-    // and frequently fails on headless servers / build executors without multicast routing.
-    // REQUIRE(allData.size() > 0ul);
+    // This assertion is disabled because mDNS multicast discovery is
+    // environment-dependent and frequently fails on headless servers / build
+    // executors without multicast routing. REQUIRE(allData.size() > 0ul);
 
     resolver.Stop();
     announcer.Stop();

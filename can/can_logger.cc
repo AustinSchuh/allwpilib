@@ -14,7 +14,7 @@ ABSL_FLAG(int32_t, affinity, -1, "If positive, pin to this core.");
 
 namespace frc::can_logger {
 
-CanLogger::CanLogger(aos::ShmEventLoop *event_loop,
+CanLogger::CanLogger(aos::ShmEventLoop* event_loop,
                      std::string_view channel_name,
                      std::string_view interface_name)
     : shm_event_loop_(event_loop),
@@ -29,7 +29,11 @@ CanLogger::CanLogger(aos::ShmEventLoop *event_loop,
         aos::MakeCpusetFromCpus({absl::GetFlag(FLAGS_affinity)}));
   }
   struct ifreq ifr;
-  strcpy(ifr.ifr_name, interface_name.data());
+  std::memset(&ifr, 0, sizeof(ifr));
+  if (interface_name.size() >= IFNAMSIZ) {
+    LOG(FATAL) << "Interface name too long: " << interface_name;
+  }
+  std::copy(interface_name.begin(), interface_name.end(), ifr.ifr_name);
   PCHECK(ioctl(fd_.get(), SIOCGIFINDEX, &ifr) == 0)
       << "Failed to get index for interface " << interface_name;
 
@@ -39,10 +43,11 @@ CanLogger::CanLogger(aos::ShmEventLoop *event_loop,
       << "Failed to enable CAN FD";
 
   struct sockaddr_can addr;
+  std::memset(&addr, 0, sizeof(addr));
   addr.can_family = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
 
-  PCHECK(bind(fd_.get(), reinterpret_cast<struct sockaddr *>(&addr),
+  PCHECK(bind(fd_.get(), reinterpret_cast<struct sockaddr*>(&addr),
               sizeof(addr)) == 0)
       << "Failed to bind socket to interface " << interface_name;
 
@@ -54,7 +59,7 @@ CanLogger::CanLogger(aos::ShmEventLoop *event_loop,
   VLOG(0) << "CAN recieve bufffer is " << recieve_buffer_size << " bytes large";
 
   if (absl::GetFlag(FLAGS_poll)) {
-    aos::TimerHandler *timer_handler =
+    aos::TimerHandler* timer_handler =
         shm_event_loop_->AddTimer([this]() { Poll(); });
     timer_handler->set_name("CAN logging Loop");
     timer_handler->Schedule(event_loop->monotonic_now(), kPollPeriod);

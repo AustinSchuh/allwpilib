@@ -1,12 +1,11 @@
 #include "absl/flags/flag.h"
-
 #include "aos/events/shm_event_loop.h"
 #include "aos/init.h"
 #include "can/can_logger.h"
 
 ABSL_FLAG(std::string, interface_name, "can0", "Can interface to use");
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   ::aos::InitGoogle(&argc, &argv);
 
   aos::FlatbufferDetachedBuffer<aos::Configuration> config =
