@@ -1,5 +1,6 @@
-load("@aos//aos/flatbuffers:generate.bzl", "static_flatbuffer")
 load("@aos//aos:config.bzl", "aos_config")
+load("@aos//aos/flatbuffers:generate.bzl", "static_flatbuffer")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 aos_config(
@@ -74,8 +75,8 @@ cc_test(
     deps = [
         ":can_logger_lib",
         "@aos//aos/events:simulated_event_loop",
-        "@com_google_absl//absl/flags:flag",
         "@aos//aos/testing:googletest",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 
