@@ -179,3 +179,8 @@ single_version_override(
     ],
     version = "20260526.0",
 )
+
+single_version_override(
+    module_name = "googleapis",
+    version = "0.0.0-20251003-2193a2bf",
+)
