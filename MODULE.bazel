@@ -148,9 +148,10 @@ http_jar(
 )
 
 bazel_dep(name = "aos")
-local_path_override(
+archive_override(
     module_name = "aos",
-    path = "../aos",
+    strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade",
+    urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
 )
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
