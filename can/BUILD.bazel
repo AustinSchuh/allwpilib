@@ -67,6 +67,10 @@ cc_test(
     data = [
         ":aos_config",
     ],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":can_logger_lib",
         "@aos//aos/events:simulated_event_loop",
