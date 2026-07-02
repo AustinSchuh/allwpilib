@@ -12,7 +12,7 @@ bazel_dep(name = "apple_support", version = "2.0.0", repo_name = "build_bazel_ap
 bazel_dep(name = "rules_cc", version = "0.2.18")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "bazel_features", version = "1.43.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.19.3")
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_java", version = "9.3.0")
@@ -180,8 +180,9 @@ single_version_override(
     version = "20260526.0",
 )
 
-bazel_dep(name = "googleapis", version = "0.0.0-20251003-2193a2bf", repo_name = "com_google_googleapis")
-switched_rules = use_extension("@com_google_googleapis//:extensions.bzl", "switched_rules")
-inject_repo(switched_rules, com_google_googleapis_imports = "bazel_tools")
+single_version_override(
+    module_name = "envoy_api",
+    version = "0.0.0-20260130-84e8436",
+)
 
 
