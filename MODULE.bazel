@@ -157,9 +157,10 @@ archive_override(
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
 bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
 bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
-local_path_override(
+archive_override(
     module_name = "flatbuffers",
-    path = "../aos/third_party/flatbuffers/",
+    strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade/third_party/flatbuffers",
+    urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
 )
 
 archive_override(
