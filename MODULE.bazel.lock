@@ -2588,8 +2588,10 @@
     "@@rules_rust+//crate_universe:extension.bzl%crate": {
       "general": {
         "bzlTransitiveDigest": "1XKlgSIUCUTAlB7d7zb8UOjpfqraxkA+yIfADtx1Vcw=",
-        "usagesDigest": "95zp9YTOQsRSg66ueCPK+bcqZlq7gUJJ7tZF3b2e7P0=",
+        "usagesDigest": "HAVoKkwvKxbqUFRr16jVyJsTf/QTG/Bm8iBDwQb0gCo=",
         "recordedFileInputs": {
+          "@@//Cargo.Bazel.lock": "fbaf5f675d258a7cbe2ea61faf5884baccf8a906cb5ec6d7d4184ba2befbd70e",
+          "@@//third_party/cargo/cxxbridge-cmd/Cargo.Bazel.lock": "bd106b341fc0d73c0bc44ddc5178e61f89d4623dbed22589ee54749ce00282ff",
           "@@aos++_repo_rules2+cxxbridge-cmd//Cargo.toml": "b4e0c767c12741a6ef2e96e9c705cc5b337e895a2c5602a8bce783167911bcf2",
           "@@aos+//Cargo.lock": "c25fa81c15728521c6755a91b964941027c61d13798060cb5130ee0ee8c40f93",
           "@@aos+//Cargo.toml": "4bdb626956275bf58bc58bac4607c04135e966f882ebd5c73191b1ed46ef311c",
@@ -2600,7 +2602,6 @@
           "@@aos+//third_party/autocxx/macro/Cargo.toml": "398d65e0a9d13c4195d8e05dc56edd9817a248acb175a25f52b08487e8f1fb3c",
           "@@aos+//third_party/autocxx/parser/Cargo.toml": "7854463a547010e490fc3325c3d1a8f586cf0b7a377b5247866167d68453bd13",
           "@@aos+//third_party/cargo/cxx/include.BUILD.bazel": "ad4222caaabd50b9eed948e1d75cc73d7a9358886d6e2026c4c604d2e6bad05a",
-          "@@aos+//third_party/cargo/cxxbridge-cmd/Cargo.Bazel.lock": "bd106b341fc0d73c0bc44ddc5178e61f89d4623dbed22589ee54749ce00282ff",
           "@@aos+//third_party/cargo/cxxbridge-cmd/Cargo.lock": "b06fba5e53d0997bc75eebe320ae81feb249595ace7efe85cbb3e58cf1fb193d",
           "@@flatbuffers+//rust/flatbuffers/Cargo.toml": "6699ab2317bf18470b256835a2ddb7c3e634429c3f84e61aa2544c3628f55587",
           "@@flatbuffers+//rust/flexbuffers/Cargo.toml": "4580efa880f042a58d51bb9adf25a25b2a540cbcf7905276c01080ab2c99226f",
