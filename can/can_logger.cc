@@ -51,12 +51,12 @@ CanLogger::CanLogger(aos::ShmEventLoop* event_loop,
               sizeof(addr)) == 0)
       << "Failed to bind socket to interface " << interface_name;
 
-  int recieve_buffer_size;
-  socklen_t opt_size = sizeof(recieve_buffer_size);
-  PCHECK(getsockopt(fd_.get(), SOL_SOCKET, SO_RCVBUF, &recieve_buffer_size,
+  int receive_buffer_size;
+  socklen_t opt_size = sizeof(receive_buffer_size);
+  PCHECK(getsockopt(fd_.get(), SOL_SOCKET, SO_RCVBUF, &receive_buffer_size,
                     &opt_size) == 0);
-  CHECK_EQ(opt_size, sizeof(recieve_buffer_size));
-  VLOG(0) << "CAN recieve bufffer is " << recieve_buffer_size << " bytes large";
+  CHECK_EQ(opt_size, sizeof(receive_buffer_size));
+  VLOG(0) << "CAN receive buffer is " << receive_buffer_size << " bytes large";
 
   if (absl::GetFlag(FLAGS_poll)) {
     aos::TimerHandler* timer_handler =
@@ -83,7 +83,7 @@ bool CanLogger::ReadFrame() {
   ssize_t bytes_read = read(fd_.get(), &frame, sizeof(struct canfd_frame));
 
   if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-    // There are no more frames sitting in the recieve buffer.
+    // There are no more frames sitting in the receive buffer.
     return false;
   }
 

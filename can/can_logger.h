@@ -43,7 +43,7 @@ class CanLogger {
   void Poll();
 
   // Read a CAN frame from the socket and send it on the event loop
-  // Returns true if successful and false if the recieve buffer is empty.
+  // Returns true if successful and false if the receive buffer is empty.
   bool ReadFrame();
 
   aos::ShmEventLoop* shm_event_loop_;
