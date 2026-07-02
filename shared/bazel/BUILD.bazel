@@ -70,9 +70,8 @@ platform(
 platform(
     name = "osx",
     flags = [
-    ] + gcc_flags,
+    ],
     parents = [
         "@wpilib_toolchains//platforms/osx",
     ],
 )
-
