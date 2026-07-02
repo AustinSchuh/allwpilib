@@ -1,0 +1,49 @@
+diff --git a/absl/debugging/BUILD.bazel b/absl/debugging/BUILD.bazel
+index e6f11e8..a524411 100644
+--- a/absl/debugging/BUILD.bazel
++++ b/absl/debugging/BUILD.bazel
+@@ -182,6 +182,7 @@ cc_library(
+         "//absl/base:config",
+         "//absl/base:core_headers",
+         "//absl/base:raw_logging_internal",
++        "//absl/log/internal:globals",
+     ],
+ )
+
+diff --git a/absl/debugging/failure_signal_handler.cc b/absl/debugging/failure_signal_handler.cc
+index 16609f1..f681b3a 100644
+--- a/absl/debugging/failure_signal_handler.cc
++++ b/absl/debugging/failure_signal_handler.cc
+@@ -54,6 +54,7 @@
+ #include "absl/base/internal/sysinfo.h"
+ #include "absl/debugging/internal/examine_stack.h"
+ #include "absl/debugging/stacktrace.h"
++#include "absl/log/internal/globals.h"
+
+ #if !defined(_WIN32) && !defined(__wasi__)
+ #define ABSL_HAVE_SIGACTION
+@@ -315,8 +316,10 @@ static void WriteFailureInfo(int signo, void* ucontext, int cpu,
+                              void (*writerfn)(const char*)) {
+   WriterFnStruct writerfn_struct{writerfn};
+   WriteSignalMessage(signo, cpu, writerfn);
+-  WriteStackTrace(ucontext, fsh_options.symbolize_stacktrace, WriterFnWrapper,
+-                  &writerfn_struct);
++  if (!(signo == SIGABRT && log_internal::SuppressSigabortTrace())) {
++    WriteStackTrace(ucontext, fsh_options.symbolize_stacktrace, WriterFnWrapper,
++                    &writerfn_struct);
++  }
+ }
+
+ // absl::SleepFor() can't be used here since AbslInternalSleepFor()
+diff --git a/absl/log/internal/BUILD.bazel b/absl/log/internal/BUILD.bazel
+index 6995b26..5731b33 100644
+--- a/absl/log/internal/BUILD.bazel
++++ b/absl/log/internal/BUILD.bazel
+@@ -161,6 +161,7 @@ cc_library(
+     visibility = [
+         "//absl:friends",
+         "//absl/log:__pkg__",
++        "//absl/debugging:__pkg__",
+     ],
+     deps = [
+         "//absl/base:config",

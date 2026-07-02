@@ -172,8 +172,8 @@ single_version_override(
     module_name = "abseil-cpp",
     patch_strip = 1,
     patches = [
-        "third_party/aos_patches/abseil/0001-Add-hooks-for-using-abseil-with-AOS.patch",
-        "third_party/aos_patches/abseil/0002-Suppress-the-stack-trace-on-SIGABRT.patch",
+        "third_party/abseil/0001-Add-hooks-for-using-abseil-with-AOS.patch",
+        "third_party/abseil/0002-Suppress-the-stack-trace-on-SIGABRT.patch",
     ],
     version = "20260526.0",
 )
