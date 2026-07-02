@@ -108,7 +108,7 @@ build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
 try-import %workspace%/bazel_auth.rc
 
 
-common --registry=file://%workspace%/../aos/registry
+common --registry=https://raw.githubusercontent.com/AustinSchuh/aos/unreviewed/AustinSchuh/jax_upgrade/registry
 common --registry=https://bcr.bazel.build
 
 # Honor the setting of `skipLibCheck` in the tsconfig.json file.
