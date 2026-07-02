@@ -150,6 +150,7 @@ http_jar(
 bazel_dep(name = "aos")
 archive_override(
     module_name = "aos",
+    integrity = "sha256-ZWpHyCaynbBs5gizeitYYlcS3QYi7r9DHdND6nNyy9g=",
     strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade",
     urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
 )
@@ -159,6 +160,7 @@ bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_a
 bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
 archive_override(
     module_name = "flatbuffers",
+    integrity = "sha256-ZWpHyCaynbBs5gizeitYYlcS3QYi7r9DHdND6nNyy9g=",
     strip_prefix = "aos-unreviewed-AustinSchuh-jax_upgrade/third_party/flatbuffers",
     urls = ["https://github.com/AustinSchuh/aos/archive/refs/heads/unreviewed/AustinSchuh/jax_upgrade.tar.gz"],
 )
