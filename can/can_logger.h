@@ -30,11 +30,12 @@ class CanLogger {
   static constexpr std::chrono::milliseconds kPollPeriod =
       std::chrono::milliseconds(100);
 
-  CanLogger(aos::EventLoop* event_loop, std::string_view channel_name = "/can",
-            std::string_view interface_name = "can0");
+  explicit CanLogger(aos::EventLoop* event_loop,
+                     std::string_view channel_name = "/can",
+                     std::string_view interface_name = "can0");
 
-  CanLogger(aos::EventLoop* event_loop, aos::ScopedFD fd,
-            std::string_view channel_name = "/can");
+  explicit CanLogger(aos::EventLoop* event_loop, aos::ScopedFD fd,
+                     std::string_view channel_name = "/can");
 
   CanLogger(const CanLogger&) = delete;
   CanLogger& operator=(const CanLogger&) = delete;

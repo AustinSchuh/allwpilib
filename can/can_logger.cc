@@ -119,15 +119,6 @@ bool CanLogger::ReadFrame() {
          bytes_read == static_cast<ssize_t>(CANFD_MTU))
       << "Incomplete can frame";
 
-  bool has_time = false;
-  struct timeval tv;
-  if (ioctl(fd_.get(), SIOCGSTAMP, &tv) != 0) {
-    has_time = true;
-    auto rt_now = event_loop_->realtime_now().time_since_epoch();
-    tv.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(rt_now).count();
-    tv.tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(rt_now).count() % 1000000;
-  }
-
   aos::Sender<CanFrame>::Builder builder = frames_sender_.MakeBuilder();
 
   auto frame_data = builder.fbb()->CreateVector<uint8_t>(frame.data, frame.len);
@@ -136,7 +127,8 @@ bool CanLogger::ReadFrame() {
   can_frame_builder.add_can_id(frame.can_id);
   can_frame_builder.add_flags(frame.flags);
   can_frame_builder.add_data(frame_data);
-  if (has_time) {
+  struct timeval tv;
+  if (ioctl(fd_.get(), SIOCGSTAMP, &tv) == 0) {
     can_frame_builder.add_realtime_timestamp_ns(
         std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::seconds(tv.tv_sec) +
