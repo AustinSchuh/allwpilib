@@ -58,6 +58,30 @@ static_flatbuffer(
     visibility = ["//visibility:public"],
 )
 
+cc_test(
+    name = "can_logger_test",
+    srcs = [
+        "can_logger_test.cc",
+    ],
+    copts = ["-Wno-pedantic"],
+    data = [
+        ":aos_config",
+    ],
+    deps = [
+        ":can_logger_lib",
+        "@aos//aos/events:simulated_event_loop",
+        "@com_google_absl//absl/flags:flag",
+        "@aos//aos/testing:googletest",
+    ],
+)
+
+test_suite(
+    name = "pingpong_test",
+    tests = [
+        "@aos//aos/testing/ping_pong:pingpong_test",
+    ],
+)
+
 pkg_tar(
     name = "example",
     srcs = [

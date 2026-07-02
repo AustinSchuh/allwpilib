@@ -15,7 +15,7 @@
 
 #include <chrono>
 
-#include "aos/events/shm_event_loop.h"
+#include "aos/events/event_loop.h"
 #include "aos/realtime.h"
 #include "aos/scoped/scoped_fd.h"
 #include "can/can_logging_generated.h"
@@ -30,14 +30,18 @@ class CanLogger {
   static constexpr std::chrono::milliseconds kPollPeriod =
       std::chrono::milliseconds(100);
 
-  CanLogger(aos::ShmEventLoop* event_loop,
+  CanLogger(aos::EventLoop* event_loop,
             std::string_view channel_name = "/can",
             std::string_view interface_name = "can0");
+
+  CanLogger(aos::EventLoop* event_loop,
+            aos::ScopedFD fd,
+            std::string_view channel_name = "/can");
 
   CanLogger(const CanLogger&) = delete;
   CanLogger& operator=(const CanLogger&) = delete;
 
-  ~CanLogger() { shm_event_loop_->epoll()->DeleteFd(fd_.get()); }
+  ~CanLogger();
 
  private:
   void Poll();
@@ -46,7 +50,7 @@ class CanLogger {
   // Returns true if successful and false if the receive buffer is empty.
   bool ReadFrame();
 
-  aos::ShmEventLoop* shm_event_loop_;
+  aos::EventLoop* event_loop_;
   aos::ScopedFD fd_;
   aos::Sender<CanFrame> frames_sender_;
 };

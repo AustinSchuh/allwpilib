@@ -1,5 +1,6 @@
 #include "can/can_logger.h"
 
+#include "aos/events/shm_event_loop.h"
 #include "absl/flags/flag.h"
 #include "absl/log/check.h"
 #include "absl/log/log.h"
@@ -12,33 +13,22 @@ ABSL_FLAG(int32_t, priority, 10,
           "If --poll is not set, set the realtime priority to this.");
 ABSL_FLAG(int32_t, affinity, -1, "If positive, pin to this core.");
 
-namespace frc::can_logger {
+namespace {
+aos::ScopedFD CreateSocket(std::string_view interface_name) {
+  aos::ScopedFD fd(socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW));
+  PCHECK(fd.get() >= 0) << "Failed to open CAN socket";
 
-CanLogger::CanLogger(aos::ShmEventLoop* event_loop,
-                     std::string_view channel_name,
-                     std::string_view interface_name)
-    : shm_event_loop_(event_loop),
-      fd_(socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)),
-      frames_sender_(shm_event_loop_->MakeSender<CanFrame>(channel_name)) {
-  // TODO(max): Figure out a proper priority
-  if (!absl::GetFlag(FLAGS_poll)) {
-    shm_event_loop_->SetRuntimeRealtimePriority(absl::GetFlag(FLAGS_priority));
-  }
-  if (absl::GetFlag(FLAGS_affinity) >= 0) {
-    shm_event_loop_->SetRuntimeAffinity(
-        aos::MakeCpusetFromCpus({absl::GetFlag(FLAGS_affinity)}));
-  }
   struct ifreq ifr;
   std::memset(&ifr, 0, sizeof(ifr));
   if (interface_name.size() >= IFNAMSIZ) {
     LOG(FATAL) << "Interface name too long: " << interface_name;
   }
   std::copy(interface_name.begin(), interface_name.end(), ifr.ifr_name);
-  PCHECK(ioctl(fd_.get(), SIOCGIFINDEX, &ifr) == 0)
+  PCHECK(ioctl(fd.get(), SIOCGIFINDEX, &ifr) == 0)
       << "Failed to get index for interface " << interface_name;
 
   int enable_canfd = true;
-  PCHECK(setsockopt(fd_.get(), SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd,
+  PCHECK(setsockopt(fd.get(), SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd,
                     sizeof(enable_canfd)) == 0)
       << "Failed to enable CAN FD";
 
@@ -47,24 +37,60 @@ CanLogger::CanLogger(aos::ShmEventLoop* event_loop,
   addr.can_family = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
 
-  PCHECK(bind(fd_.get(), reinterpret_cast<struct sockaddr*>(&addr),
+  PCHECK(bind(fd.get(), reinterpret_cast<struct sockaddr*>(&addr),
               sizeof(addr)) == 0)
       << "Failed to bind socket to interface " << interface_name;
 
   int receive_buffer_size;
   socklen_t opt_size = sizeof(receive_buffer_size);
-  PCHECK(getsockopt(fd_.get(), SOL_SOCKET, SO_RCVBUF, &receive_buffer_size,
+  PCHECK(getsockopt(fd.get(), SOL_SOCKET, SO_RCVBUF, &receive_buffer_size,
                     &opt_size) == 0);
   CHECK_EQ(opt_size, sizeof(receive_buffer_size));
   VLOG(0) << "CAN receive buffer is " << receive_buffer_size << " bytes large";
 
+  return fd;
+}
+}  // namespace
+
+namespace frc::can_logger {
+
+CanLogger::CanLogger(aos::EventLoop* event_loop,
+                     std::string_view channel_name,
+                     std::string_view interface_name)
+    : CanLogger(event_loop, CreateSocket(interface_name), channel_name) {}
+
+CanLogger::CanLogger(aos::EventLoop* event_loop,
+                     aos::ScopedFD fd,
+                     std::string_view channel_name)
+    : event_loop_(event_loop),
+      fd_(std::move(fd)),
+      frames_sender_(event_loop_->MakeSender<CanFrame>(channel_name)) {
+  if (!absl::GetFlag(FLAGS_poll)) {
+    event_loop_->SetRuntimeRealtimePriority(absl::GetFlag(FLAGS_priority));
+  }
+  if (absl::GetFlag(FLAGS_affinity) >= 0) {
+    event_loop_->SetRuntimeAffinity(
+        aos::MakeCpusetFromCpus({absl::GetFlag(FLAGS_affinity)}));
+  }
+
   if (absl::GetFlag(FLAGS_poll)) {
     aos::TimerHandler* timer_handler =
-        shm_event_loop_->AddTimer([this]() { Poll(); });
+        event_loop_->AddTimer([this]() { Poll(); });
     timer_handler->set_name("CAN logging Loop");
-    timer_handler->Schedule(event_loop->monotonic_now(), kPollPeriod);
+    timer_handler->Schedule(event_loop_->monotonic_now(), kPollPeriod);
   } else {
-    shm_event_loop_->epoll()->OnReadable(fd_.get(), [this]() { Poll(); });
+    aos::ShmEventLoop* shm_event_loop = dynamic_cast<aos::ShmEventLoop*>(event_loop_);
+    ABSL_CHECK(shm_event_loop != nullptr);
+    shm_event_loop->epoll()->OnReadable(fd_.get(), [this]() { Poll(); });
+  }
+}
+
+CanLogger::~CanLogger() {
+  if (!absl::GetFlag(FLAGS_poll) && fd_.get() >= 0) {
+    aos::ShmEventLoop* shm_event_loop = dynamic_cast<aos::ShmEventLoop*>(event_loop_);
+    if (shm_event_loop != nullptr) {
+      shm_event_loop->epoll()->DeleteFd(fd_.get());
+    }
   }
 }
 
@@ -93,9 +119,14 @@ bool CanLogger::ReadFrame() {
          bytes_read == static_cast<ssize_t>(CANFD_MTU))
       << "Incomplete can frame";
 
+  bool has_time = false;
   struct timeval tv;
-  PCHECK(ioctl(fd_.get(), SIOCGSTAMP, &tv) == 0)
-      << "Failed to get timestamp of CAN frame";
+  if (ioctl(fd_.get(), SIOCGSTAMP, &tv) != 0) {
+    has_time = true;
+    auto rt_now = event_loop_->realtime_now().time_since_epoch();
+    tv.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(rt_now).count();
+    tv.tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(rt_now).count() % 1000000;
+  }
 
   aos::Sender<CanFrame>::Builder builder = frames_sender_.MakeBuilder();
 
@@ -105,11 +136,13 @@ bool CanLogger::ReadFrame() {
   can_frame_builder.add_can_id(frame.can_id);
   can_frame_builder.add_flags(frame.flags);
   can_frame_builder.add_data(frame_data);
-  can_frame_builder.add_realtime_timestamp_ns(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(
-          std::chrono::seconds(tv.tv_sec) +
-          std::chrono::microseconds(tv.tv_usec))
-          .count());
+  if (has_time) {
+    can_frame_builder.add_realtime_timestamp_ns(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::seconds(tv.tv_sec) +
+            std::chrono::microseconds(tv.tv_usec))
+            .count());
+  }
 
   builder.CheckOk(builder.Send(can_frame_builder.Finish()));
 
