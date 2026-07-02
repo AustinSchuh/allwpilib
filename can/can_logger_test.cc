@@ -27,7 +27,7 @@ class CanLoggerTest : public ::testing::Test {
     const aos::Node *node =
         aos::configuration::GetNode(&config_.message(), "robot");
     event_loop_ = simulated_event_loop_factory_.MakeEventLoop("test_node", node);
-    
+
     // Create fetcher to read logged CAN frames.
     can_frame_fetcher_ = event_loop_->MakeFetcher<CanFrame>("/can");
   }
