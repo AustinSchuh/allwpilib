@@ -151,12 +151,31 @@ http_jar(
 )
 
 bazel_dep(name = "aos")
-archive_override(
+
+# TODO(user): Temporarily pointing @aos to ../aos.
+# To restore upstream aos, comment out/remove the local_path_override block below and uncomment the archive_override block.
+local_path_override(
     module_name = "aos",
-    integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
-    strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a",
-    urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
+    path = "../aos",
 )
+
+# TODO(user): Temporarily override rules_halide to resolve transitive dependency from local @aos.
+# Delete/comment out this archive_override block once @aos is reverted to upstream.
+archive_override(
+    module_name = "rules_halide",
+    integrity = "sha256-GVdoOVilwyDKmA+Nfu2MdRXZDy09gGeLTgRKcclZ6pI=",
+    strip_prefix = "rules_halide-0.0.1",
+    urls = [
+        "https://github.com/RealtimeRoboticsGroup/rules_halide/releases/download/v0.0.1/rules_halide-0.0.1.tar.zst",
+    ],
+)
+
+# archive_override(
+#     module_name = "aos",
+#     integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
+#     strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a",
+#     urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
+# )
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
 bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
