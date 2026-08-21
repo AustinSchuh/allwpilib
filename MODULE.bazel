@@ -3,12 +3,21 @@ module(
     version = "0.0.0",
 )
 
+# NOTE: keep a comment on each include() below. buildifier 8.2.1+ formats
+# MODULE.bazel as -type=module, which packs consecutive calls to the same
+# function together unless a comment interrupts the run; the comments are what
+# preserve the blank lines between these.
+
+# Doxygen documentation rules.
 include("//docs:doxygen.MODULE.bazel")
 
+# Ceres solver.
 include("//shared/bazel/thirdparty/ceres:ceres.MODULE.bazel")
 
+# libssh.
 include("//shared/bazel/thirdparty/libssh:libssh.MODULE.bazel")
 
+# mrclib.
 include("//shared/bazel/thirdparty/mrclib:mrclib.MODULE.bazel")
 
 bazel_dep(name = "apple_support", version = "2.0.0", repo_name = "build_bazel_apple_support")
