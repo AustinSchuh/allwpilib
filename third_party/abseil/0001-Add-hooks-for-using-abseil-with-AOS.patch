@@ -5,11 +5,11 @@ index be8ceaf..0beccdd 100644
 @@ -31,6 +31,19 @@
  #include <strings.h>  // for strcasecmp, but msvc does not have this header
  #endif
-
+ 
 +#ifdef _WIN32
-+extern "C" void aos_FatalUnsetRealtimePriority_default() {}
++extern "C" void aos_FatalUnsetRealtimePriority_default_check_op() {}
 +extern "C" void aos_FatalUnsetRealtimePriority();
-+#pragma comment(linker, "/alternatename:aos_FatalUnsetRealtimePriority=aos_FatalUnsetRealtimePriority_default")
++#pragma comment(linker, "/alternatename:aos_FatalUnsetRealtimePriority=aos_FatalUnsetRealtimePriority_default_check_op")
 +#else
 +extern "C" void aos_FatalUnsetRealtimePriority();
 +extern "C" __attribute__((weak)) void aos_FatalUnsetRealtimePriority() {}
@@ -23,13 +23,14 @@ index be8ceaf..0beccdd 100644
  ABSL_NAMESPACE_BEGIN
  namespace log_internal {
 @@ -55,6 +68,7 @@ ABSL_LOG_INTERNAL_DEFINE_MAKE_CHECK_OP_STRING(const void*);
-
+ 
  CheckOpMessageBuilder::CheckOpMessageBuilder(
-     const char* absl_nonnull exprtext) {
-+  MaybeUnsetRealtime();
+-    const char* absl_nonnull exprtext) {
++    const char* absl_nonnull exprtext)
++    : stream_(([&]() { MaybeUnsetRealtime(); return std::ios_base::out; })()) {
    stream_ << exprtext << " (";
  }
-
+ 
 diff --git a/absl/log/internal/log_message.cc b/absl/log/internal/log_message.cc
 index 4acd503..39b0e3e 100644
 --- a/absl/log/internal/log_message.cc
@@ -37,11 +38,11 @@ index 4acd503..39b0e3e 100644
 @@ -66,6 +66,19 @@ extern "C" ABSL_ATTRIBUTE_WEAK void ABSL_INTERNAL_C_SYMBOL(
    // Default - Do nothing
  }
-
+ 
 +#ifdef _WIN32
-+extern "C" void aos_FatalUnsetRealtimePriority_default() {}
++extern "C" void aos_FatalUnsetRealtimePriority_default_log_message() {}
 +extern "C" void aos_FatalUnsetRealtimePriority();
-+#pragma comment(linker, "/alternatename:aos_FatalUnsetRealtimePriority=aos_FatalUnsetRealtimePriority_default")
++#pragma comment(linker, "/alternatename:aos_FatalUnsetRealtimePriority=aos_FatalUnsetRealtimePriority_default_log_message")
 +#else
 +extern "C" void aos_FatalUnsetRealtimePriority();
 +extern "C" __attribute__((weak)) void aos_FatalUnsetRealtimePriority() {}
