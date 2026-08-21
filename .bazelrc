@@ -111,6 +111,14 @@ build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
 # runfiles, and that package shadows the real aos/flatbuffers.py module.
 build --incompatible_default_to_explicit_init_py
 
+# Likewise from @aos's .bazelrc. --enable_runfiles defaults to "auto", which
+# means off on Windows, so no runfiles tree gets materialized there. @aos's
+# flatbuffer rules pass -I <flatc>.runfiles/flatbuffers+ so that schemas can
+# resolve includes against the upstream flatbuffers layout (aos/configuration.fbs
+# includes "reflection/reflection.fbs"), and without the tree that directory does
+# not exist and flatc cannot find the include.
+build:windows --enable_runfiles
+
 try-import %workspace%/bazel_auth.rc
 
 
