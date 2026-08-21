@@ -118,7 +118,7 @@ try-import %workspace%/bazel_auth.rc
 # @aos//aos:json_to_flatbuffer and friends build against. Pin it to the same
 # commit as AOS_SHA1 in MODULE.bazel -- if the two drift, flatbuffers silently
 # falls through to the unpatched BCR module and @aos fails to compile.
-common --registry=https://raw.githubusercontent.com/AustinSchuh/aos/323bb90b32d77432762711bd9534a8d216bebf74/registry
+common --registry=https://raw.githubusercontent.com/AustinSchuh/aos/a927ea660d2af78cce313eb90b1d0321a7263a29/registry
 common --registry=https://bcr.bazel.build
 
 # Honor the setting of `skipLibCheck` in the tsconfig.json file.

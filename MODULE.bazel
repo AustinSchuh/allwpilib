@@ -203,11 +203,11 @@ archive_override(
     urls = ["https://github.com/hedronvision/bazel-compile-commands-extractor/archive/daae6f40adfa5fdb7c89684cbe4d88b691c63b2d.tar.gz"],
 )
 
-AOS_SHA1 = "1f5d7e1e452c20d8ab533e8b126413c980ed2fde"
+AOS_SHA1 = "a927ea660d2af78cce313eb90b1d0321a7263a29"
 
 archive_override(
     module_name = "aos",
-    integrity = "sha256-M6TIcgHSA5WGhDok0LG5hJ96B0bw+MFig2kiaF6UhHo=",
+    integrity = "sha256-bWdVXS5Ed1K8ZhazCtJA8E3y9usHkUX5kb25GsYjksI=",
     strip_prefix = "aos-" + AOS_SHA1,
     urls = ["https://github.com/AustinSchuh/aos/archive/" + AOS_SHA1 + ".tar.gz"],
 )
