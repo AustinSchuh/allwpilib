@@ -1350,6 +1350,45 @@
         "recordedRepoMappingEntries": []
       }
     },
+    "@@aos+//tools/cpp:extensions.bzl%dev_toolchains_extension": {
+      "general": {
+        "bzlTransitiveDigest": "1JzkGV6K33udxGF0Tibj1spJmjMBY196YytmN5D6v6E=",
+        "usagesDigest": "3TaSDoWil1gQbKvwI2Z4qgewUNtxzBZ2/wyackCIzBQ=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "arm_frc_linux_gnueabi_repo": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@aos+//:registry/modules/arm_frc_linux_gnueabi_repo/2025.2.0/overlay/BUILD.bazel",
+              "patches": [
+                "@@aos+//:registry/modules/arm_frc_linux_gnueabi_repo/2025.2.0/patches/fts.patch"
+              ],
+              "sha256": "e1aea36b35c48d81e146a12a4b7428af051e525fac18c85a53c7be98339cce9f",
+              "strip_prefix": "roborio-academic",
+              "url": "https://github.com/wpilibsuite/opensdk/releases/download/v2025-2/cortexa9_vfpv3-roborio-academic-2025-x86_64-linux-gnu-Toolchain-12.1.0.tgz"
+            }
+          },
+          "gcc_arm_none_eabi": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@aos+//:compilers/gcc_arm_none_eabi.BUILD",
+              "sha256": "6cd1bbc1d9ae57312bcd169ae283153a9572bd6a8e4eeae2fedfbc33b115fdbb",
+              "strip_prefix": "arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi",
+              "url": "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "aos+",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
     "@@aos+//tools/cpp:extensions.bzl%llvm_tools_extension": {
       "general": {
         "bzlTransitiveDigest": "1JzkGV6K33udxGF0Tibj1spJmjMBY196YytmN5D6v6E=",
@@ -1362,6 +1401,135 @@
             "repoRuleId": "@@aos+//tools/cpp:llvm_tools.bzl%llvm_tool_alias_repo",
             "attributes": {
               "src_repo": "llvm_toolchain"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "aos+",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
+    "@@aos+//tools/frc:extensions.bzl%frc_deps_extension": {
+      "general": {
+        "bzlTransitiveDigest": "lLI5KY/6SsZ6bGlqLxzbWYiZNcDlJtqKWAojIItOkEY=",
+        "usagesDigest": "LHlKfhIGyt6b/cot0wl2HIbJPyHTVoUPGRD5XkAKPTQ=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "frc2026_field_map_welded": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "frc2026.fmap",
+              "sha256": "5a2b0ce9069cf0e52602939121aa1f0bf3cdc5bc9adf8744eeebaf67350effbe",
+              "urls": [
+                "https://downloads.limelightvision.io/models/FRC2026_WELDED.fmap"
+              ]
+            }
+          },
+          "intrinsic_calibration_test_images": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"intrinsic_calibration_test_images\",\n    srcs = glob([\"**\"]),\n    visibility = [\"//visibility:public\"],\n)",
+              "sha256": "0359e5c19117835c6ec336233a3bbfe2b273797afe9460bf224496802b8f4055",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/intrinsic_calibration_test_images.tar.gz"
+            }
+          },
+          "orin_image_apriltag": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "orin_image_apriltag.bfbs",
+              "sha256": "c86604fd0b1301b301e299b1bba2573af8c586413934a386a2bd28fd9b037b84",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/orin_image_apriltag.bfbs"
+            }
+          },
+          "orin_large_image_apriltag": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "orin_large_gs_apriltag.bfbs",
+              "sha256": "d933adac0d6c205c574791060be73701ead05977ff5dd9f6f4eadb45817c3ccb",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/orin_large_gs_apriltag.bfbs"
+            }
+          },
+          "orin_capture_24_04": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "orin_capture_24_04.bfbs",
+              "sha256": "719edb1d1394c13c1b55d02cf35c277e1d4c2111f4eb4220b28addc08634488a",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/orin-capture-24-04-2024.02.14.bfbs"
+            }
+          },
+          "orin_capture_24_04_side": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "orin_capture_24_04_side.bfbs",
+              "sha256": "4747cc98f8794d6570cb12a3171d7984e358581914a28b43fb6bb8b9bd7a10ac",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/orin-capture-24-04-side-2024.02.17.bfbs"
+            }
+          },
+          "coral_image_thriftycam_2025": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "downloaded_file_path": "image.bfbs",
+              "sha256": "b746bda7db8a6233a74c59c35f3c9d5e343cd9f9c580c897013e8dff7c492eed",
+              "urls": [
+                "https://realtimeroboticsgroup.org/build-dependencies/coral_image_thriftycam_2025.bfbs"
+              ]
+            }
+          },
+          "calibrate_multi_cameras_data": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"calibrate_multi_cameras_data\",\n    srcs = glob([\"**\"]),\n    visibility = [\"//visibility:public\"],\n)",
+              "sha256": "b106b3b975d3cf3ad3fcd5e4be7409f6095e1d531346a90c4ad6bdb7da1d08a5",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/2023_calibrate_multi_cameras_data.tar.gz"
+            }
+          },
+          "apriltag_test_bfbs_images": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"apriltag_test_bfbs_images\",\n    srcs = glob([\"**\"]),\n    visibility = [\"//visibility:public\"],\n)",
+              "sha256": "2356b9d0b3be59d01e837bfbbee21de55b16232d5e00c66701c20b64ff3272e3",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/2023_arducam_apriltag_test_images.tar.gz"
+            }
+          },
+          "april_tag_test_image": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"april_tag_test_image\",\n    srcs = [\"test.bfbs\", \"expected.jpeg\", \"expected.png\"],\n    visibility = [\"//visibility:public\"],\n)",
+              "sha256": "5312c79b19e9883b3cebd9d65b4438a2bf05b41da0bcd8c35e19d22c3b2e1859",
+              "urls": [
+                "https://realtimeroboticsgroup.org/build-dependencies/test_image_frc971.vision.CameraImage_2023.01.28.tar.gz"
+              ]
+            }
+          },
+          "drivetrain_replay": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"drivetrain_replay\",\n    srcs = glob([\"**/*.bfbs\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
+              "sha256": "115dcd2fe005cb9cad3325707aa7f4466390c43a08555edf331c06c108bdf692",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/2021-03-20_drivetrain_spin_wheels.tar.gz"
+            }
+          },
+          "superstructure_replay": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file_content": "\nfilegroup(\n    name = \"superstructure_replay\",\n    srcs = glob([\"**/*.bfbs\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
+              "sha256": "2b9a3ecc83f2aba89a1909ae38fe51e6718a5b4d0e7c131846dfb2845df9cd19",
+              "url": "https://realtimeroboticsgroup.org/build-dependencies/2021-10-03_superstructure_shoot_balls.tar.gz"
+            }
+          },
+          "com_github_nvidia_cccl": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@aos+//third_party/cccl:cccl.BUILD",
+              "sha256": "38160c628a9e32b7cd55553f299768f72b24074cc9c1a993ba40a177877b3421",
+              "strip_prefix": "cccl-931dc6793482c61edbc97b7a19256874fd264313",
+              "url": "https://github.com/NVIDIA/cccl/archive/931dc6793482c61edbc97b7a19256874fd264313.zip"
             }
           }
         },
@@ -2484,6 +2652,33 @@
         ]
       }
     },
+    "@@hedron_compile_commands+//:workspace_setup.bzl%hedron_compile_commands_extension": {
+      "general": {
+        "bzlTransitiveDigest": "VYsbf/V1v3V5TDFZ2riUvy3/is1118QpHOrxcytCrW0=",
+        "usagesDigest": "CbJ2MjubH36j9xaONhhASfhodhpi5fzvuyg/IW2f7Ds=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {},
+        "recordedRepoMappingEntries": []
+      }
+    },
+    "@@rules_android_ndk+//:extension.bzl%android_ndk_repository_extension": {
+      "general": {
+        "bzlTransitiveDigest": "oV/TPZWCXAAcpJG/DBV/lNiWCISUTk5ba0KRjUb7adg=",
+        "usagesDigest": "rYjKcwcv3vA+Fa07DrfyENGmuyGjHplNHpc5MBS0tLY=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "androidndk": {
+            "repoRuleId": "@@rules_android_ndk+//:rules.bzl%android_ndk_repository",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@rules_buf+//buf:extensions.bzl%buf": {
       "general": {
         "bzlTransitiveDigest": "7lUQZIi5u5kjLotkiZrmQ3jldx7w/31P5crwGwQQnmI=",
@@ -2620,7 +2815,7 @@
     "@@rules_halide+//:extensions.bzl%halide": {
       "general": {
         "bzlTransitiveDigest": "GVlhpETtGvCoYJz0XcK4d7tddEiUdAS2I8Ddo2Gnihs=",
-        "usagesDigest": "rI1Ps1yxDla+QWAcZFAN0j7NLns/YjDJOTodapey1D0=",
+        "usagesDigest": "KROYEHQzg4kQR/g8Ae788XCg+JMxc3AqC2IQttG+MgI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -3039,7 +3234,7 @@
     },
     "@@rules_rust+//crate_universe/private:internal_extensions.bzl%cu_nr": {
       "general": {
-        "bzlTransitiveDigest": "0pBYLjBcsD/nGj+1NA+Qi3sI8FfUCbtJD4pOzumKxrI=",
+        "bzlTransitiveDigest": "rPcNliQGx+AFoOeNlTs8yrsFjKnxgBt8X4VElOJgc4w=",
         "usagesDigest": "cXwM8V1dYpvU0qY6LVYuUUf4Ql389ZhymEzwJhYVr2o=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

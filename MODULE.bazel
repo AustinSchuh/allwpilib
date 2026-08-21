@@ -202,6 +202,7 @@ archive_override(
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
 bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
+
 # @aos used to vendor flatbuffers under third_party/flatbuffers; it now takes it
 # from the registry and pins the version with a single_version_override. That
 # override is dropped because @aos is not the root module, so repeat the pin here.
