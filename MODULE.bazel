@@ -204,6 +204,20 @@ archive_override(
 )
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
+
+# @aos patches aspect_rules_js so the npm extension works on Windows: upstream
+# 2.9.2 short-circuits `is_windows or utils.exists(...)` in three places (because
+# utils.exists() fails on Windows), which then hands yq a pnpm-workspace.yaml that
+# does not exist -- e.g. @flatbuffers//ts, which ships a pnpm-lock.yaml but no
+# pnpm-workspace.yaml. The patch implements exists() via rctx.path().exists and
+# drops the short-circuits. @aos's override is dropped because it is not the root
+# module, so repeat it here. Keep in sync with ../aos/MODULE.bazel.
+single_version_override(
+    module_name = "aspect_rules_js",
+    patch_strip = 1,
+    patches = ["third_party/aspect_rules_js/aspect_rules_js.patch"],
+)
+
 bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
 
 # @aos used to vendor flatbuffers under third_party/flatbuffers; it now takes it
