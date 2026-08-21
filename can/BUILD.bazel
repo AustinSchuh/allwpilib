@@ -22,6 +22,7 @@ cc_binary(
         "can_logger_main.cc",
     ],
     copts = ["-Wno-pedantic"],
+    target_compatible_with = ["@platforms//os:linux"],
     visibility = ["//visibility:public"],
     deps = [
         ":can_logger_lib",
@@ -41,6 +42,8 @@ cc_library(
         "can_logger.h",
     ],
     copts = ["-Wno-pedantic"],
+    # SocketCAN (linux/can.h) is Linux-only.
+    target_compatible_with = ["@platforms//os:linux"],
     visibility = ["//visibility:public"],
     deps = [
         ":can_logging_fbs",

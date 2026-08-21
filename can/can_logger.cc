@@ -81,7 +81,7 @@ CanLogger::CanLogger(aos::EventLoop* event_loop,
   } else {
     aos::ShmEventLoop* shm_event_loop = dynamic_cast<aos::ShmEventLoop*>(event_loop_);
     ABSL_CHECK(shm_event_loop != nullptr);
-    shm_event_loop->epoll()->OnReadable(fd_.get(), [this]() { Poll(); });
+    shm_event_loop->aio()->OnReadable(fd_.get(), [this]() { Poll(); });
   }
 }
 
@@ -89,7 +89,7 @@ CanLogger::~CanLogger() {
   if (!absl::GetFlag(FLAGS_poll) && fd_.get() >= 0) {
     aos::ShmEventLoop* shm_event_loop = dynamic_cast<aos::ShmEventLoop*>(event_loop_);
     if (shm_event_loop != nullptr) {
-      shm_event_loop->epoll()->DeleteFd(fd_.get());
+      shm_event_loop->aio()->DeleteFd(fd_.get());
     }
   }
 }

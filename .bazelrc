@@ -105,10 +105,20 @@ common:ci_windows_arm --repo_env="WPI_PUBLISH_CLASSIFIER_FILTER=headers,sources,
 build --@rules_python//python/config_settings:bootstrap_impl=script
 build --@rules_python//python/config_settings:venvs_use_declare_symlink=no
 
+# @aos sets this in its own .bazelrc, but a .bazelrc only applies to the root
+# workspace, so its py targets get the legacy behaviour when we build them.
+# Without it Bazel synthesizes an empty aos/flatbuffers/__init__.py into the
+# runfiles, and that package shadows the real aos/flatbuffers.py module.
+build --incompatible_default_to_explicit_init_py
+
 try-import %workspace%/bazel_auth.rc
 
 
-common --registry=https://raw.githubusercontent.com/AustinSchuh/aos/unreviewed/AustinSchuh/jax_upgrade/registry
+# AOS ships its own registry, which carries the patched flatbuffers that
+# @aos//aos:json_to_flatbuffer and friends build against. Pin it to the same
+# commit as AOS_SHA1 in MODULE.bazel -- if the two drift, flatbuffers silently
+# falls through to the unpatched BCR module and @aos fails to compile.
+common --registry=https://raw.githubusercontent.com/AustinSchuh/aos/323bb90b32d77432762711bd9534a8d216bebf74/registry
 common --registry=https://bcr.bazel.build
 
 # Honor the setting of `skipLibCheck` in the tsconfig.json file.

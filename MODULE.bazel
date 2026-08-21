@@ -4,11 +4,8 @@ module(
 )
 
 include("//docs:doxygen.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/ceres:ceres.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/libssh:libssh.MODULE.bazel")
-
 include("//shared/bazel/thirdparty/mrclib:mrclib.MODULE.bazel")
 
 bazel_dep(name = "apple_support", version = "2.0.0", repo_name = "build_bazel_apple_support")
@@ -152,39 +149,66 @@ http_jar(
 
 bazel_dep(name = "aos")
 
+# @aos's tools/lint and tools/go reference @go_sdk. rules_go only honors the
+# `name` attribute of go_sdk.download in the root module, so @aos declares its
+# own download as a dev_dependency (used when @aos is built standalone) and
+# expects whoever consumes it to declare the equivalently named repo.
+#
+# Unlike @aos, which only builds on Linux and Apple Silicon, this has to list
+# every host we build on: go_download_sdk fails with "unsupported platform" if
+# the host tuple is missing from `sdks`. Hashes come from
+# https://go.dev/dl/?mode=json&include=all.
+bazel_dep(name = "rules_go", version = "0.61.1", repo_name = "io_bazel_rules_go")
+
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(
+    name = "go_sdk",
+    sdks = {
+        "darwin_amd64": ("go1.24.13.darwin-amd64.tar.gz", "6cc6549b06725220b342b740497ffd24e0ebdcef75781a77931ca199f46ad781"),
+        "darwin_arm64": ("go1.24.13.darwin-arm64.tar.gz", "f282d882c3353485e2fc6c634606d85caf36e855167d59b996dbeae19fa7629a"),
+        "linux_amd64": ("go1.24.13.linux-amd64.tar.gz", "1fc94b57134d51669c72173ad5d49fd62afb0f1db9bf3f798fd98ee423f8d730"),
+        "linux_arm64": ("go1.24.13.linux-arm64.tar.gz", "74d97be1cc3a474129590c67ebf748a96e72d9f3a2b6fef3ed3275de591d49b3"),
+        "windows_amd64": ("go1.24.13.windows-amd64.zip", "40b16bc8f00540a2cb02dff4de72b73e966fdd8d65f95e33d8e4080b48a2459a"),
+        "windows_arm64": ("go1.24.13.windows-arm64.zip", "e2c4e1b0c083965adecb893b97145f89bb8e39b3d745c6499fa1f8aa44bc065f"),
+    },
+    version = "1.24.13",
+)
+
 # TODO(user): Temporarily pointing @aos to ../aos.
 # To restore upstream aos, comment out/remove the local_path_override block below and uncomment the archive_override block.
-local_path_override(
-    module_name = "aos",
-    path = "../aos",
-)
+#local_path_override(
+#module_name = "aos",
+#path = "../aos",
+#)
 
-# TODO(user): Temporarily override rules_halide to resolve transitive dependency from local @aos.
-# Delete/comment out this archive_override block once @aos is reverted to upstream.
+# @aos declares `bazel_dep(name = "hedron_compile_commands")` with no version and
+# supplies the version itself via archive_override. Overrides are only honored in
+# the root module, so we have to repeat it here. Keep in sync with ../aos/MODULE.bazel.
 archive_override(
-    module_name = "rules_halide",
-    integrity = "sha256-GVdoOVilwyDKmA+Nfu2MdRXZDy09gGeLTgRKcclZ6pI=",
-    strip_prefix = "rules_halide-0.0.1",
-    urls = [
-        "https://github.com/RealtimeRoboticsGroup/rules_halide/releases/download/v0.0.1/rules_halide-0.0.1.tar.zst",
-    ],
+    module_name = "hedron_compile_commands",
+    integrity = "sha256-Q0UaMr8nHnukY1oH95ltU1UB8GbA/o/qsE+wyR3VmG4=",
+    strip_prefix = "bazel-compile-commands-extractor-daae6f40adfa5fdb7c89684cbe4d88b691c63b2d",
+    urls = ["https://github.com/hedronvision/bazel-compile-commands-extractor/archive/daae6f40adfa5fdb7c89684cbe4d88b691c63b2d.tar.gz"],
 )
 
-# archive_override(
-#     module_name = "aos",
-#     integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
-#     strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a",
-#     urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
-# )
+AOS_SHA1 = "323bb90b32d77432762711bd9534a8d216bebf74"
+
+archive_override(
+    module_name = "aos",
+    integrity = "sha256-mMt8RS551g8pRTUOnngKsv782kI7RyiYJbqAimvle3I=",
+    strip_prefix = "aos-" + AOS_SHA1,
+    urls = ["https://github.com/AustinSchuh/aos/archive/" + AOS_SHA1 + ".tar.gz"],
+)
 
 bazel_dep(name = "aspect_rules_ts", version = "3.6.3")
 bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
-bazel_dep(name = "flatbuffers", version = "24.3.25", repo_name = "com_github_google_flatbuffers")
-archive_override(
+# @aos used to vendor flatbuffers under third_party/flatbuffers; it now takes it
+# from the registry and pins the version with a single_version_override. That
+# override is dropped because @aos is not the root module, so repeat the pin here.
+bazel_dep(name = "flatbuffers", version = "25.12.19", repo_name = "com_github_google_flatbuffers")
+single_version_override(
     module_name = "flatbuffers",
-    integrity = "sha256-ToMDHvLGPzg3mDxuXbzOLSHmhqdAx3Vdnr1wqHowPvY=",
-    strip_prefix = "aos-500d6390343305fa20672eb59450eac5bfc83e2a/third_party/flatbuffers",
-    urls = ["https://github.com/AustinSchuh/aos/archive/500d6390343305fa20672eb59450eac5bfc83e2a.tar.gz"],
+    version = "25.12.19",
 )
 
 archive_override(
