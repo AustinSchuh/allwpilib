@@ -113,18 +113,19 @@ jobs:
   buildifier:
     name: "buildifier"
     runs-on: ubuntu-24.04
+    env:
+      # Keep in sync with the buildifier_prebuilt version used by @aos.
+      BUILDIFIER_VERSION: "7.3.1"
+      BUILDIFIER_SHA256: "5474cc5128a74e806783d54081f581662c4be8ae65022f557e9281ed5dc88009"
     steps:
-      - name: Set up Go 1.15.x
-        uses: actions/setup-go@v6
-        with:
-          cache: false
-          go-version: 1.15.x
-        id: go
-
       - name: Install Buildifier
         run: |
-          cd $(mktemp -d)
-          GO111MODULE=on go get github.com/bazelbuild/buildtools/buildifier@6.0.0
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -sSfLo "$RUNNER_TEMP/bin/buildifier" \
+            "https://github.com/bazelbuild/buildtools/releases/download/v$BUILDIFIER_VERSION/buildifier-linux-amd64"
+          echo "$BUILDIFIER_SHA256  $RUNNER_TEMP/bin/buildifier" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/bin/buildifier"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
