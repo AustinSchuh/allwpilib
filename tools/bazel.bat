@@ -1,5 +1,9 @@
 @echo off
-setlocal enabledelayedexpansion
+:: Delayed expansion stays off for the whole script, explicitly rather than by
+:: inheritance, so that a "!" in an environment value or in a forwarded Bazel
+:: argument -- a proxy password or a remote cache header, say -- is never eaten
+:: while a line is reparsed.  Nothing below may use "!var!".
+setlocal disabledelayedexpansion
 
 :: Bazelisk runs this wrapper instead of Bazel itself on Windows.  It bootstraps
 :: a private copy of PortableGit, which supplies both git and bash/sh, and then
@@ -25,15 +29,15 @@ if defined BAZEL_OVERRIDE (
     set "_SAVE_TARGET=%BAZEL_REAL%"
 )
 
-:: 2. The pinned hermetic git.  The version is part of the cache path so that
-:: bumping the pin below installs the new release rather than silently reusing
-:: whatever an older revision of this script left behind.
-set "GIT_PKG_VERSION=2.44.0"
+:: 2. The pinned hermetic git.
 set "GIT_RELEASE_TAG=v2.44.0.windows.1"
 set "GIT_ARCHIVE_NAME=PortableGit-2.44.0-64-bit.7z.exe"
 set "GIT_EXPECTED_SHA256=1fc64ca91b9b475ab0ada72c9f7b3addbe69a6c8f520be31425cf21841cca369"
 
-set "GIT_CACHE_DIR=%BAZEL_CACHE_DIR%\portable_git\%GIT_PKG_VERSION%"
+:: Key the cache by the whole pin, tag and checksum both, so that any change to
+:: the three lines above installs the new release instead of being short
+:: circuited by a git.exe that an older revision of this script left behind.
+set "GIT_CACHE_DIR=%BAZEL_CACHE_DIR%\portable_git\%GIT_RELEASE_TAG%-%GIT_EXPECTED_SHA256:~0,12%"
 set "GIT_EXE_PATH=%GIT_CACHE_DIR%\cmd\git.exe"
 
 if exist "%GIT_EXE_PATH%" goto git_ready
@@ -74,16 +78,14 @@ set "_SAVE_WPI_PUBLISH_CLASSIFIER_FILTER=%WPI_PUBLISH_CLASSIFIER_FILTER%"
 set "_SAVE_HTTP_PROXY=%HTTP_PROXY%"
 set "_SAVE_HTTPS_PROXY=%HTTPS_PROXY%"
 set "_SAVE_NO_PROXY=%NO_PROXY%"
-:: Critical cradle: back up our bootstrapped Git path and git configuration so
-:: the environment purge loop below ignores them.
+:: Critical cradle: back up our bootstrapped Git path so the environment purge
+:: loop below ignores it.
 set "_SAVE_GIT_CACHE_DIR=%GIT_CACHE_DIR%"
 
-for /f "tokens=1 delims==" %%a in ('set') do (
-    set "VAR_NAME=%%a"
-    if not "!VAR_NAME:~0,6!"=="_SAVE_" (
-        set "%%a="
-    )
-)
+for /f "tokens=1 delims==" %%a in ('set') do call :clear_unless_saved "%%a"
+:: The subroutine creates this after the snapshot the loop iterates over,
+:: so it has to be cleared by hand.
+set "VAR_NAME="
 
 set "SystemRoot=%_SAVE_SYSTEMROOT%"
 set "SystemDrive=%_SAVE_SYSTEMDRIVE%"
@@ -127,7 +129,7 @@ set "BAZEL_GIT=%_SAVE_GIT_CACHE_DIR%\cmd\git.exe"
 set "GIT_BIN_PATH=%_SAVE_GIT_CACHE_DIR%\cmd\git.exe"
 set "BAZEL_SH=%_SAVE_GIT_CACHE_DIR%\bin\bash.exe"
 
-:: HOME has to keep pointing at the real profile because Bazel reads its user
+:: HOME has to keep pointing at the real profile because Bazel reads the user
 :: .bazelrc from there.  That would also hand the pinned git the developer's
 :: ~/.gitconfig, where settings like core.autocrlf or url.*.insteadOf would make
 :: fetches machine dependent, so point git at nonexistent config files instead.
@@ -144,17 +146,29 @@ set "BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=0"
 
 :: 4. Drop the scratch copies so that they do not leak into the environment
 :: that Bazel and its repository rules end up seeing.
-set "VAR_NAME="
 for /f "tokens=1 delims==" %%a in ('set _SAVE_') do (
     if not "%%a"=="_SAVE_TARGET" set "%%a="
 )
 
-:: 5. Execute the isolated Bazel process.  Delayed expansion goes back off
-:: first, otherwise a "!" anywhere in the forwarded arguments -- a remote cache
-:: header or a proxy password, say -- gets eaten while %* is reparsed.
-setlocal disabledelayedexpansion
+:: 5. Execute the isolated Bazel process.
 "%_SAVE_TARGET%" %*
 exit /b %ERRORLEVEL%
+
+:: Clear one environment variable unless it is one of the values stashed above.
+:: This is a subroutine rather than the body of the loop because reading a
+:: variable that was assigned in the same block would require delayed expansion.
+:clear_unless_saved
+set "VAR_NAME=%~1"
+if /i "%VAR_NAME:~0,6%"=="_SAVE_" exit /b 0
+set "%VAR_NAME%="
+exit /b 0
+
+:: Strip the spaces certutil pads its digest with.  Also a subroutine so that
+:: the value never passes through delayed expansion.
+:set_computed_sha256
+set "SHA_LINE=%~1"
+set "COMPUTED_SHA256=%SHA_LINE: =%"
+exit /b 0
 
 :: Fetch, verify, and install the pinned PortableGit release.
 ::
@@ -163,7 +177,7 @@ exit /b %ERRORLEVEL%
 :: cold cache can't corrupt each other's download and a failed install never
 :: leaves a half unpacked tree behind for the next invocation to trust.
 :install_git
-echo [Wrapper] Git %GIT_PKG_VERSION% is not in the runtime cache. Fetching isolated PortableGit... >&2
+echo [Wrapper] Git %GIT_RELEASE_TAG% is not in the runtime cache. Fetching isolated PortableGit... >&2
 
 set "STAGE_DIR=%BAZEL_CACHE_DIR%\portable_git\staging_%RANDOM%_%RANDOM%"
 if exist "%STAGE_DIR%" rmdir /s /q "%STAGE_DIR%"
@@ -185,18 +199,14 @@ if errorlevel 1 (
 
 echo [Wrapper] Validating cryptographic payload checksum... >&2
 set "COMPUTED_SHA256="
-for /f "skip=1 delims=" %%A in ('certutil -hashfile "%STAGE_DIR%\git.7z.exe" SHA256 ^| findstr /v "CertUtil"') do (
-    set "LINE=%%A"
-    set "LINE=!LINE: =!"
-    set "COMPUTED_SHA256=!LINE!"
-)
+for /f "skip=1 delims=" %%A in ('certutil -hashfile "%STAGE_DIR%\git.7z.exe" SHA256 ^| findstr /v "CertUtil"') do call :set_computed_sha256 "%%A"
 
-if /i not "!COMPUTED_SHA256!"=="%GIT_EXPECTED_SHA256%" (
+if /i not "%COMPUTED_SHA256%"=="%GIT_EXPECTED_SHA256%" (
     echo. >&2
     echo =============================================================== >&2
     echo SECURITY ERROR: Cryptographic checksum mismatch detected. >&2
     echo Expected: %GIT_EXPECTED_SHA256% >&2
-    echo Received: !COMPUTED_SHA256! >&2
+    echo Received: %COMPUTED_SHA256% >&2
     echo =============================================================== >&2
     rmdir /s /q "%STAGE_DIR%"
     exit /b 1
