@@ -10,9 +10,19 @@ setlocal disabledelayedexpansion
 :: scrubs the environment before handing off to Bazel.  That keeps the build from
 :: depending on whatever happens to be installed and on PATH on the machine.
 
-:: Use the short (8.3) form of the profile directory so that a user name with a
-:: space in it doesn't break paths downstream.
-for %%I in ("%USERPROFILE%") do set "USERPROFILE=%%~sI"
+:: A space in the profile directory breaks paths downstream, so fall back to the
+:: short (8.3) form for those users.  Only for those users: 8.3 names have
+:: nothing to do with spaces otherwise, and there is no reason to hand everyone
+:: else a mangled path.
+if not "%USERPROFILE%"=="%USERPROFILE: =%" (
+    for %%I in ("%USERPROFILE%") do set "USERPROFILE=%%~sI"
+)
+:: 8.3 name generation can be turned off, in which case there is nothing to fall
+:: back to and Bazel is going to fail in a way that is hard to connect to this.
+if not "%USERPROFILE%"=="%USERPROFILE: =%" (
+    echo [Wrapper] Warning: %USERPROFILE% contains a space and has no 8.3 short name. >&2
+    echo [Wrapper] Bazel may fail on it.  Enable 8.3 names, or move the profile. >&2
+)
 
 set "BAZEL_CACHE_DIR=%USERPROFILE%\.cache\bazel"
 
@@ -46,6 +56,15 @@ if errorlevel 1 exit /b 1
 :git_ready
 
 :: 3. Environment sandboxing (the Windows equivalent of "env -i").
+::
+:: Not for the sake of actions -- --incompatible_strict_action_env already hands
+:: those a fixed environment.  Repository rules are the gap: they see the client
+:: environment in full through repository_ctx.os.environ, and that is where the
+:: C++ toolchain gets configured.  rules_cc declares thirty-odd variables as
+:: inputs to cc_autoconf -- BAZEL_VC, TMP, TEMP, CC, USER, the VS*COMNTOOLS set
+:: -- and hands the whole environment to the subprocesses it runs to find MSVC.
+:: Whatever differs between two machines there ends up baked into
+:: local_config_cc, and from there into everything that compiles.
 set "_SAVE_SYSTEMROOT=%SystemRoot%"
 set "_SAVE_SYSTEMDRIVE=%SystemDrive%"
 set "_SAVE_COMSPEC=%ComSpec%"
