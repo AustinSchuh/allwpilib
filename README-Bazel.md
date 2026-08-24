@@ -7,12 +7,13 @@ WPILib is normally built with Gradle, but [Bazel](https://www.bazel.build/) can 
 - Install [Bazelisk](https://github.com/bazelbuild/bazelisk/releases) and add it to your path. Bazelisk is a wrapper that will download the correct version of Bazel specified in the repository. Note: You can alias/rename the binary to `bazel` if you want to keep the familiar `bazel build` vs `bazelisk build` syntax.
 
 ### Windows
-On Windows, Bazelisk hands off to `tools/bazel.bat` instead of running Bazel directly. That wrapper downloads a private copy of [PortableGit](https://github.com/git-for-windows/git/releases) into `%USERPROFILE%\.cache\bazel\portable_git` (verified against a pinned SHA256), points `BAZEL_SH`, `BAZEL_GIT`, and `GIT_BIN_PATH` at it, and then clears the rest of the environment before starting Bazel. This means the build gets the same `bash`, `sh`, and `git` on every machine rather than whichever ones happen to be on `PATH`, and stray environment variables can't leak into actions and poison the remote cache.
+On Windows, Bazelisk hands off to `tools/bazel.bat` instead of running Bazel directly. That wrapper downloads a private copy of [PortableGit](https://github.com/git-for-windows/git/releases) into `%USERPROFILE%\.cache\bazel\portable_git\<version>` (verified against a pinned SHA256), points `BAZEL_SH`, `BAZEL_GIT`, and `GIT_BIN_PATH` at it, and then clears the rest of the environment before starting Bazel. This means the build gets the same `bash`, `sh`, and `git` on every machine rather than whichever ones happen to be on `PATH`, and stray environment variables can't leak into actions and poison the remote cache.
 
 Consequences worth knowing about:
 - You must invoke Bazel through Bazelisk. Running a `bazel.exe` binary directly skips the wrapper, and the build will fall back to whatever shell it can find.
 - The first invocation on a machine spends a minute or so fetching and unpacking PortableGit. Later invocations reuse the cached copy.
 - A short allowlist survives the environment scrub: `BAZEL_VC`/`BAZEL_VS` (set one of these if Visual Studio isn't installed in the default location), the `ProgramFiles` paths, `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY`, and `WPI_PUBLISH_CLASSIFIER_FILTER`. Anything else you export in your shell will not reach the build.
+- Your `PATH` is the one exception to that scrub: the system directories and the pinned Git come first, but the rest of your original `PATH` is still appended behind them. Actions don't see it (`--incompatible_strict_action_env` gives them a fixed `PATH`), so this only matters for repository rules that shell out to a tool the wrapper hasn't pinned.
 
 ## Building
 To build the entire repository, simply run `bazel build //...`. To run all of the unit tests, run `bazel test //...`

@@ -17,7 +17,7 @@ if defined BAZEL_OVERRIDE (
     echo Actually calling "%BAZEL_OVERRIDE%"
     set "_SAVE_TARGET=%BAZEL_OVERRIDE%"
 ) else (
-    rem 2. Ensure Bazelisk integration.
+    rem Ensure Bazelisk integration.
     if not defined BAZEL_REAL (
         echo Error: This script must be run via Bazelisk on Windows. >&2
         exit /b 1
@@ -25,79 +25,23 @@ if defined BAZEL_OVERRIDE (
     set "_SAVE_TARGET=%BAZEL_REAL%"
 )
 
-:: 3. Automated hermetic git bootstrapping with SHA256 validation.
-set "GIT_CACHE_DIR=%BAZEL_CACHE_DIR%\portable_git"
+:: 2. The pinned hermetic git.  The version is part of the cache path so that
+:: bumping the pin below installs the new release rather than silently reusing
+:: whatever an older revision of this script left behind.
+set "GIT_PKG_VERSION=2.44.0"
+set "GIT_RELEASE_TAG=v2.44.0.windows.1"
+set "GIT_ARCHIVE_NAME=PortableGit-2.44.0-64-bit.7z.exe"
+set "GIT_EXPECTED_SHA256=1fc64ca91b9b475ab0ada72c9f7b3addbe69a6c8f520be31425cf21841cca369"
+
+set "GIT_CACHE_DIR=%BAZEL_CACHE_DIR%\portable_git\%GIT_PKG_VERSION%"
 set "GIT_EXE_PATH=%GIT_CACHE_DIR%\cmd\git.exe"
 
-if not exist "%GIT_EXE_PATH%" (
-    echo [Wrapper] Git not detected in runtime cache. Fetching isolated PortableGit... >&2
+if exist "%GIT_EXE_PATH%" goto git_ready
+call :install_git
+if errorlevel 1 exit /b 1
+:git_ready
 
-    set "GIT_VERSION=v2.44.0.windows.1"
-    set "GIT_ZIP_NAME=PortableGit-2.44.0-64-bit.7z.exe"
-    set "GIT_URL=https://github.com/git-for-windows/git/releases/download/!GIT_VERSION!/!GIT_ZIP_NAME!"
-    set "EXPECTED_SHA256=1fc64ca91b9b475ab0ada72c9f7b3addbe69a6c8f520be31425cf21841cca369"
-
-    set "TEMP_DOWNLOAD_DIR=%BAZEL_CACHE_DIR%\git_tmp"
-    if exist "!TEMP_DOWNLOAD_DIR!" rmdir /s /q "!TEMP_DOWNLOAD_DIR!"
-    mkdir "!TEMP_DOWNLOAD_DIR!"
-
-    echo [Wrapper] Downloading from !GIT_URL! ... >&2
-
-    curl -fL --silent --show-error --output "!TEMP_DOWNLOAD_DIR!\git.7z.exe" "!GIT_URL!"
-    if errorlevel 1 (
-        echo Error: Failed to download hermetic Git toolchain >&2
-        exit /b 1
-    )
-
-    echo [Wrapper] Validating cryptographic payload checksum... >&2
-    set "COMPUTED_SHA256="
-    for /f "skip=1 delims=" %%A in ('certutil -hashfile "!TEMP_DOWNLOAD_DIR!\git.7z.exe" SHA256 ^| findstr /v "CertUtil"') do (
-        set "LINE=%%A"
-        set "LINE=!LINE: =!"
-        set "COMPUTED_SHA256=!LINE!"
-    )
-
-    if /i not "!COMPUTED_SHA256!"=="!EXPECTED_SHA256!" (
-        echo. >&2
-        echo =============================================================== >&2
-        echo SECURITY ERROR: Cryptographic checksum mismatch detected. >&2
-        echo Expected: !EXPECTED_SHA256! >&2
-        echo Received: !COMPUTED_SHA256! >&2
-        echo =============================================================== >&2
-        rmdir /s /q "!TEMP_DOWNLOAD_DIR!"
-        exit /b 1
-    )
-    echo [Wrapper] Integrity verification successful. SHA256 matches. >&2
-
-    echo [Wrapper] Extracting archive package... >&2
-    mkdir "%GIT_CACHE_DIR%" 2>nul
-    "!TEMP_DOWNLOAD_DIR!\git.7z.exe" -y -o"%GIT_CACHE_DIR%" >nul
-    set "EXTRACT_STATUS=!errorlevel!"
-
-    rmdir /s /q "!TEMP_DOWNLOAD_DIR!"
-
-    rem Throw the half unpacked cache away rather than leaving something
-    rem behind that later invocations would mistake for a good install.
-    if not "!EXTRACT_STATUS!"=="0" (
-        echo Error: Extracting the hermetic Git toolchain failed with status !EXTRACT_STATUS! >&2
-        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
-        exit /b 1
-    )
-    if not exist "%GIT_EXE_PATH%" (
-        echo Error: %GIT_EXE_PATH% is missing after extraction >&2
-        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
-        exit /b 1
-    )
-    if not exist "%GIT_CACHE_DIR%\bin\bash.exe" (
-        echo Error: %GIT_CACHE_DIR%\bin\bash.exe is missing after extraction >&2
-        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
-        exit /b 1
-    )
-
-    echo [Wrapper] Isolated Git runtime setup completed successfully. >&2
-)
-
-:: 4. Environment sandboxing (the Windows equivalent of "env -i").
+:: 3. Environment sandboxing (the Windows equivalent of "env -i").
 set "_SAVE_SYSTEMROOT=%SystemRoot%"
 set "_SAVE_SYSTEMDRIVE=%SystemDrive%"
 set "_SAVE_COMSPEC=%ComSpec%"
@@ -131,12 +75,8 @@ set "_SAVE_HTTP_PROXY=%HTTP_PROXY%"
 set "_SAVE_HTTPS_PROXY=%HTTPS_PROXY%"
 set "_SAVE_NO_PROXY=%NO_PROXY%"
 :: Critical cradle: back up our bootstrapped Git path and git configuration so
-:: the environment purge loop below ignores them.  Configure git through
-:: GIT_CONFIG_PARAMETERS rather than "git config --global" so that we don't
-:: scribble on the developer's own ~/.gitconfig.  The value has to be a list of
-:: single quoted key=value pairs or git rejects it outright.
+:: the environment purge loop below ignores them.
 set "_SAVE_GIT_CACHE_DIR=%GIT_CACHE_DIR%"
-set "_SAVE_GIT_CONFIG_PARAMETERS='http.sslBackend=openssl' 'http.sslVerify=true'"
 
 for /f "tokens=1 delims==" %%a in ('set') do (
     set "VAR_NAME=%%a"
@@ -158,7 +98,6 @@ set "USER=%_SAVE_USERNAME%"
 set "COMPUTERNAME=%_SAVE_COMPUTERNAME%"
 set "HOSTNAME=%_SAVE_COMPUTERNAME%"
 set "PROCESSOR_ARCHITECTURE=%_SAVE_PROCESSOR_ARCHITECTURE%"
-set "GIT_CONFIG_PARAMETERS=%_SAVE_GIT_CONFIG_PARAMETERS%"
 
 if defined _SAVE_BAZEL_VC set "BAZEL_VC=%_SAVE_BAZEL_VC%"
 if defined _SAVE_BAZEL_VS set "BAZEL_VS=%_SAVE_BAZEL_VS%"
@@ -173,6 +112,13 @@ if defined _SAVE_HTTP_PROXY set "HTTP_PROXY=%_SAVE_HTTP_PROXY%"
 if defined _SAVE_HTTPS_PROXY set "HTTPS_PROXY=%_SAVE_HTTPS_PROXY%"
 if defined _SAVE_NO_PROXY set "NO_PROXY=%_SAVE_NO_PROXY%"
 
+:: The original PATH is deliberately kept, but only as a low priority tail.
+:: git and bash are bound by absolute path below, and --incompatible_strict_action_env
+:: means Bazel hands actions a fixed PATH of its own regardless, so what is left
+:: here is what repository rules see when they shell out to something this
+:: wrapper hasn't pinned.  Dropping it outright breaks anyone who keeps a needed
+:: tool outside the system directories, so it stays until every such lookup is
+:: pinned explicitly.
 set "PATH=%_SAVE_SYSTEMROOT%\system32;%_SAVE_SYSTEMROOT%;%_SAVE_SYSTEMROOT%\System32\Wbem;%_SAVE_GIT_CACHE_DIR%\cmd;%_SAVE_GIT_CACHE_DIR%\bin;%_SAVE_GIT_CACHE_DIR%\usr\bin;%_SAVE_PATH%"
 
 :: Critical explicit binding: force Bazel's repository rules to bypass PATH
@@ -181,17 +127,114 @@ set "BAZEL_GIT=%_SAVE_GIT_CACHE_DIR%\cmd\git.exe"
 set "GIT_BIN_PATH=%_SAVE_GIT_CACHE_DIR%\cmd\git.exe"
 set "BAZEL_SH=%_SAVE_GIT_CACHE_DIR%\bin\bash.exe"
 
+:: HOME has to keep pointing at the real profile because Bazel reads its user
+:: .bazelrc from there.  That would also hand the pinned git the developer's
+:: ~/.gitconfig, where settings like core.autocrlf or url.*.insteadOf would make
+:: fetches machine dependent, so point git at nonexistent config files instead.
+:: Nothing in this repository is fetched over git, so there is no credential
+:: helper to lose.
+set "GIT_CONFIG_GLOBAL=/dev/null"
+set "GIT_CONFIG_SYSTEM=/dev/null"
+:: Git only accepts a list of single quoted key=value pairs here.
+set "GIT_CONFIG_PARAMETERS='http.sslBackend=openssl' 'http.sslVerify=true'"
+
 set "TERM=dumb"
 set "LANG=C"
 set "BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=0"
 
-:: 5. Drop the scratch copies so that they do not leak into the environment
+:: 4. Drop the scratch copies so that they do not leak into the environment
 :: that Bazel and its repository rules end up seeing.
 set "VAR_NAME="
 for /f "tokens=1 delims==" %%a in ('set _SAVE_') do (
     if not "%%a"=="_SAVE_TARGET" set "%%a="
 )
 
-:: 6. Execute the isolated Bazel process.
+:: 5. Execute the isolated Bazel process.  Delayed expansion goes back off
+:: first, otherwise a "!" anywhere in the forwarded arguments -- a remote cache
+:: header or a proxy password, say -- gets eaten while %* is reparsed.
+setlocal disabledelayedexpansion
 "%_SAVE_TARGET%" %*
-endlocal
+exit /b %ERRORLEVEL%
+
+:: Fetch, verify, and install the pinned PortableGit release.
+::
+:: Everything happens in a staging directory private to this process and is
+:: published with a single rename, so that two Bazelisk invocations racing on a
+:: cold cache can't corrupt each other's download and a failed install never
+:: leaves a half unpacked tree behind for the next invocation to trust.
+:install_git
+echo [Wrapper] Git %GIT_PKG_VERSION% is not in the runtime cache. Fetching isolated PortableGit... >&2
+
+set "STAGE_DIR=%BAZEL_CACHE_DIR%\portable_git\staging_%RANDOM%_%RANDOM%"
+if exist "%STAGE_DIR%" rmdir /s /q "%STAGE_DIR%"
+mkdir "%STAGE_DIR%" 2>nul
+if not exist "%STAGE_DIR%" (
+    echo Error: Unable to create the staging directory %STAGE_DIR% >&2
+    exit /b 1
+)
+
+set "GIT_URL=https://github.com/git-for-windows/git/releases/download/%GIT_RELEASE_TAG%/%GIT_ARCHIVE_NAME%"
+echo [Wrapper] Downloading from %GIT_URL% ... >&2
+
+curl -fL --silent --show-error --output "%STAGE_DIR%\git.7z.exe" "%GIT_URL%"
+if errorlevel 1 (
+    echo Error: Failed to download the hermetic Git toolchain >&2
+    rmdir /s /q "%STAGE_DIR%"
+    exit /b 1
+)
+
+echo [Wrapper] Validating cryptographic payload checksum... >&2
+set "COMPUTED_SHA256="
+for /f "skip=1 delims=" %%A in ('certutil -hashfile "%STAGE_DIR%\git.7z.exe" SHA256 ^| findstr /v "CertUtil"') do (
+    set "LINE=%%A"
+    set "LINE=!LINE: =!"
+    set "COMPUTED_SHA256=!LINE!"
+)
+
+if /i not "!COMPUTED_SHA256!"=="%GIT_EXPECTED_SHA256%" (
+    echo. >&2
+    echo =============================================================== >&2
+    echo SECURITY ERROR: Cryptographic checksum mismatch detected. >&2
+    echo Expected: %GIT_EXPECTED_SHA256% >&2
+    echo Received: !COMPUTED_SHA256! >&2
+    echo =============================================================== >&2
+    rmdir /s /q "%STAGE_DIR%"
+    exit /b 1
+)
+echo [Wrapper] Integrity verification successful. SHA256 matches. >&2
+
+echo [Wrapper] Extracting archive package... >&2
+"%STAGE_DIR%\git.7z.exe" -y -o"%STAGE_DIR%\portable_git" >nul
+set "EXTRACT_STATUS=%errorlevel%"
+del /q "%STAGE_DIR%\git.7z.exe" 2>nul
+
+if not "%EXTRACT_STATUS%"=="0" (
+    echo Error: Extracting the hermetic Git toolchain failed with status %EXTRACT_STATUS% >&2
+    rmdir /s /q "%STAGE_DIR%"
+    exit /b 1
+)
+if not exist "%STAGE_DIR%\portable_git\cmd\git.exe" (
+    echo Error: cmd\git.exe is missing from the extracted toolchain >&2
+    rmdir /s /q "%STAGE_DIR%"
+    exit /b 1
+)
+if not exist "%STAGE_DIR%\portable_git\bin\bash.exe" (
+    echo Error: bin\bash.exe is missing from the extracted toolchain >&2
+    rmdir /s /q "%STAGE_DIR%"
+    exit /b 1
+)
+
+:: Publish with a rename.  If another process won the race then GIT_CACHE_DIR
+:: already exists, and move drops our copy inside it rather than replacing it,
+:: so undo that and keep theirs -- it passed the same checks ours did.
+move "%STAGE_DIR%\portable_git" "%GIT_CACHE_DIR%" >nul 2>&1
+if exist "%GIT_CACHE_DIR%\portable_git" rmdir /s /q "%GIT_CACHE_DIR%\portable_git"
+rmdir /s /q "%STAGE_DIR%" 2>nul
+
+if not exist "%GIT_EXE_PATH%" (
+    echo Error: Failed to install the hermetic Git toolchain into %GIT_CACHE_DIR% >&2
+    exit /b 1
+)
+
+echo [Wrapper] Isolated Git runtime setup completed successfully. >&2
+exit /b 0
