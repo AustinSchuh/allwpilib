@@ -17,7 +17,7 @@ if defined BAZEL_OVERRIDE (
     echo Actually calling "%BAZEL_OVERRIDE%"
     set "_SAVE_TARGET=%BAZEL_OVERRIDE%"
 ) else (
-    :: 2. Ensure Bazelisk integration.
+    rem 2. Ensure Bazelisk integration.
     if not defined BAZEL_REAL (
         echo Error: This script must be run via Bazelisk on Windows. >&2
         exit /b 1
@@ -72,8 +72,27 @@ if not exist "%GIT_EXE_PATH%" (
     echo [Wrapper] Extracting archive package... >&2
     mkdir "%GIT_CACHE_DIR%" 2>nul
     "!TEMP_DOWNLOAD_DIR!\git.7z.exe" -y -o"%GIT_CACHE_DIR%" >nul
+    set "EXTRACT_STATUS=!errorlevel!"
 
     rmdir /s /q "!TEMP_DOWNLOAD_DIR!"
+
+    rem Throw the half unpacked cache away rather than leaving something
+    rem behind that later invocations would mistake for a good install.
+    if not "!EXTRACT_STATUS!"=="0" (
+        echo Error: Extracting the hermetic Git toolchain failed with status !EXTRACT_STATUS! >&2
+        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
+        exit /b 1
+    )
+    if not exist "%GIT_EXE_PATH%" (
+        echo Error: %GIT_EXE_PATH% is missing after extraction >&2
+        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
+        exit /b 1
+    )
+    if not exist "%GIT_CACHE_DIR%\bin\bash.exe" (
+        echo Error: %GIT_CACHE_DIR%\bin\bash.exe is missing after extraction >&2
+        rmdir /s /q "%GIT_CACHE_DIR%" 2>nul
+        exit /b 1
+    )
 
     echo [Wrapper] Isolated Git runtime setup completed successfully. >&2
 )
@@ -96,6 +115,21 @@ set "_SAVE_BAZEL_VC=%BAZEL_VC%"
 set "_SAVE_BAZEL_VS=%BAZEL_VS%"
 set "_SAVE_BAZEL_VC_FULL_VERSION=%BAZEL_VC_FULL_VERSION%"
 set "_SAVE_BAZEL_WINSDK_FULL_VERSION=%BAZEL_WINSDK_FULL_VERSION%"
+:: rules_cc looks for vswhere.exe under %ProgramFiles(x86)% to discover the
+:: MSVC install.  It falls back to the standard C: paths when the variable is
+:: unset, so this only matters when Windows or Visual Studio isn't on the
+:: default drive, but there is nothing to gain from dropping them.
+set "_SAVE_PROGRAMFILES=%ProgramFiles%"
+set "_SAVE_PROGRAMFILES_X86=%ProgramFiles(x86)%"
+set "_SAVE_PROGRAMW6432=%ProgramW6432%"
+set "_SAVE_PROGRAMDATA=%ProgramData%"
+:: publishing_rule.bzl reads WPI_PUBLISH_CLASSIFIER_FILTER out of the
+:: environment, and README-Bazel.md documents it as a knob, so keep it.
+set "_SAVE_WPI_PUBLISH_CLASSIFIER_FILTER=%WPI_PUBLISH_CLASSIFIER_FILTER%"
+:: Neither Bazel nor git can fetch anything from behind a proxy without these.
+set "_SAVE_HTTP_PROXY=%HTTP_PROXY%"
+set "_SAVE_HTTPS_PROXY=%HTTPS_PROXY%"
+set "_SAVE_NO_PROXY=%NO_PROXY%"
 :: Critical cradle: back up our bootstrapped Git path and git configuration so
 :: the environment purge loop below ignores them.  Configure git through
 :: GIT_CONFIG_PARAMETERS rather than "git config --global" so that we don't
@@ -130,6 +164,14 @@ if defined _SAVE_BAZEL_VC set "BAZEL_VC=%_SAVE_BAZEL_VC%"
 if defined _SAVE_BAZEL_VS set "BAZEL_VS=%_SAVE_BAZEL_VS%"
 if defined _SAVE_BAZEL_VC_FULL_VERSION set "BAZEL_VC_FULL_VERSION=%_SAVE_BAZEL_VC_FULL_VERSION%"
 if defined _SAVE_BAZEL_WINSDK_FULL_VERSION set "BAZEL_WINSDK_FULL_VERSION=%_SAVE_BAZEL_WINSDK_FULL_VERSION%"
+if defined _SAVE_PROGRAMFILES set "ProgramFiles=%_SAVE_PROGRAMFILES%"
+if defined _SAVE_PROGRAMFILES_X86 set "ProgramFiles(x86)=%_SAVE_PROGRAMFILES_X86%"
+if defined _SAVE_PROGRAMW6432 set "ProgramW6432=%_SAVE_PROGRAMW6432%"
+if defined _SAVE_PROGRAMDATA set "ProgramData=%_SAVE_PROGRAMDATA%"
+if defined _SAVE_WPI_PUBLISH_CLASSIFIER_FILTER set "WPI_PUBLISH_CLASSIFIER_FILTER=%_SAVE_WPI_PUBLISH_CLASSIFIER_FILTER%"
+if defined _SAVE_HTTP_PROXY set "HTTP_PROXY=%_SAVE_HTTP_PROXY%"
+if defined _SAVE_HTTPS_PROXY set "HTTPS_PROXY=%_SAVE_HTTPS_PROXY%"
+if defined _SAVE_NO_PROXY set "NO_PROXY=%_SAVE_NO_PROXY%"
 
 set "PATH=%_SAVE_SYSTEMROOT%\system32;%_SAVE_SYSTEMROOT%;%_SAVE_SYSTEMROOT%\System32\Wbem;%_SAVE_GIT_CACHE_DIR%\cmd;%_SAVE_GIT_CACHE_DIR%\bin;%_SAVE_GIT_CACHE_DIR%\usr\bin;%_SAVE_PATH%"
 

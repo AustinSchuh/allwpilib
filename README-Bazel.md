@@ -12,7 +12,7 @@ On Windows, Bazelisk hands off to `tools/bazel.bat` instead of running Bazel dir
 Consequences worth knowing about:
 - You must invoke Bazel through Bazelisk. Running a `bazel.exe` binary directly skips the wrapper, and the build will fall back to whatever shell it can find.
 - The first invocation on a machine spends a minute or so fetching and unpacking PortableGit. Later invocations reuse the cached copy.
-- Set `BAZEL_VC` (or `BAZEL_VS`) if Visual Studio isn't installed in the default location; those variables are explicitly preserved through the environment scrub.
+- A short allowlist survives the environment scrub: `BAZEL_VC`/`BAZEL_VS` (set one of these if Visual Studio isn't installed in the default location), the `ProgramFiles` paths, `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY`, and `WPI_PUBLISH_CLASSIFIER_FILTER`. Anything else you export in your shell will not reach the build.
 
 ## Building
 To build the entire repository, simply run `bazel build //...`. To run all of the unit tests, run `bazel test //...`
