@@ -25,6 +25,15 @@ common:windows --repo_env=BAZEL_VC
 common:windows --repo_env=BAZEL_VS
 common:windows --repo_env=BAZEL_VC_FULL_VERSION
 common:windows --repo_env=BAZEL_WINSDK_FULL_VERSION
+# Keep the pinned git away from the developer's ~/.gitconfig, where settings
+# like core.autocrlf or url.*.insteadOf would make a fetch machine dependent. A
+# nonexistent config path reads as an empty config. This has to live here rather
+# than in the wrapper: exported to every process Bazel launches it would also
+# reach `bazel run //:copybara`, which needs the real configuration to find a
+# credential helper and an identity to push with.
+common:windows --repo_env=GIT_CONFIG_GLOBAL=/dev/null
+common:windows --repo_env=GIT_CONFIG_SYSTEM=/dev/null
+common:windows --repo_env="GIT_CONFIG_PARAMETERS='http.sslBackend=openssl' 'http.sslVerify=true'"
 
 build --java_language_version=25
 build --java_runtime_version=remotejdk_25

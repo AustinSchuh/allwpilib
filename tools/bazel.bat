@@ -72,14 +72,10 @@ set "BAZEL_SH=%GIT_CACHE_DIR%\bin\bash.exe"
 set "BAZEL_GIT=%GIT_CACHE_DIR%\cmd\git.exe"
 set "GIT_BIN_PATH=%GIT_CACHE_DIR%\cmd\git.exe"
 
-:: Keep the pinned git away from the developer's own ~/.gitconfig, where
-:: settings like core.autocrlf or url.*.insteadOf would make fetches machine
-:: dependent.  Nothing in this repository is fetched over git, so there is no
-:: credential helper to lose.  A nonexistent path reads as an empty config.
-set "GIT_CONFIG_GLOBAL=/dev/null"
-set "GIT_CONFIG_SYSTEM=/dev/null"
-:: Git only accepts a list of single quoted key=value pairs here.
-set "GIT_CONFIG_PARAMETERS='http.sslBackend=openssl' 'http.sslVerify=true'"
+:: Isolating the pinned git from the developer's ~/.gitconfig belongs in
+:: .bazelrc, not here.  Exported from this script it would reach every process
+:: Bazel launches, and "bazel run //:copybara" needs the real configuration to
+:: find a credential helper and an identity to push with.
 
 :: 4. Execute Bazel.
 "%BAZEL_TARGET%" %*
