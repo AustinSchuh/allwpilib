@@ -19,9 +19,7 @@ common:windows --repo_env=BAZEL_GIT
 common:windows --repo_env=GIT_BIN_PATH
 # publishing_rule.bzl declares this as an environ input and reads it straight out
 # of the environment, which is how a developer picks a subset of the artifact
-# variants to build. Name only, so the value comes from the shell exactly as it
-# does on Linux and macOS. The --config=ci lines below set it explicitly and win
-# over this, since a --config on the command line expands after the rc files.
+# variants to build.
 common:windows --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER
 # Escape hatches for a Visual Studio install outside the default location.
 common:windows --repo_env=BAZEL_VC
