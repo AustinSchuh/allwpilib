@@ -66,11 +66,10 @@ if errorlevel 1 exit /b 1
 :: through, so this is what a repository rule resolves bash, sh, and git to.
 set "PATH=%GIT_CACHE_DIR%\cmd;%GIT_CACHE_DIR%\bin;%GIT_CACHE_DIR%\usr\bin;%PATH%"
 
-:: Bind the tools explicitly as well, so nothing depends on a PATH lookup at all.
-:: Each of these is passed through by a --repo_env line in .bazelrc.
+:: Bind the shell explicitly as well, so that rules_shell and rules_cc do not
+:: depend on a PATH lookup for it.  BAZEL_SH is passed through by a --repo_env
+:: line in .bazelrc.  git has no equivalent -- PATH is how it gets found.
 set "BAZEL_SH=%GIT_CACHE_DIR%\bin\bash.exe"
-set "BAZEL_GIT=%GIT_CACHE_DIR%\cmd\git.exe"
-set "GIT_BIN_PATH=%GIT_CACHE_DIR%\cmd\git.exe"
 
 :: Isolating the pinned git from the developer's ~/.gitconfig belongs in
 :: .bazelrc, not here.  Exported from this script it would reach every process
