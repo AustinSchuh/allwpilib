@@ -100,7 +100,10 @@ jobs:
             TARGETS=...
           fi
           if [ "${{ runner.os }}" = "Windows" ]; then
-            bazel --output_user_root=D:\\bazelroot ${ACTION} ${TARGETS} --config=ci -c opt --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER='${{ matrix.classifier }}'
+            # Explicitly through Bazelisk: the runner image ships both a real
+            # bazel.exe and Bazelisk, and only Bazelisk dispatches
+            # tools/bazel.bat, which is what pins git and bash for the build.
+            bazelisk --output_user_root=D:\\bazelroot ${ACTION} ${TARGETS} --config=ci -c opt --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER='${{ matrix.classifier }}'
           else
             bazel ${ACTION} ${TARGETS} --config=ci -c opt --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER='${{ matrix.classifier }}'
           fi

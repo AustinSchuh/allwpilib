@@ -46,9 +46,9 @@ if defined BAZEL_OVERRIDE (
 )
 
 :: 2. The pinned hermetic git.
-set "GIT_RELEASE_TAG=v2.44.0.windows.1"
-set "GIT_ARCHIVE_NAME=PortableGit-2.44.0-64-bit.7z.exe"
-set "GIT_EXPECTED_SHA256=1fc64ca91b9b475ab0ada72c9f7b3addbe69a6c8f520be31425cf21841cca369"
+set "GIT_RELEASE_TAG=v2.55.0.windows.5"
+set "GIT_ARCHIVE_NAME=PortableGit-2.55.0.5-64-bit.7z.exe"
+set "GIT_EXPECTED_SHA256=5aa8a20f6e9abb2c755f0e73c91c687701a46b309ad84a0ca6509380fa4ae290"
 
 :: Key the cache by the whole pin, tag and checksum both, so that any change to
 :: the three lines above installs the new release instead of being short
@@ -116,7 +116,13 @@ if errorlevel 1 (
 
 echo [Wrapper] Validating cryptographic payload checksum... >&2
 set "COMPUTED_SHA256="
-for /f "skip=1 delims=" %%A in ('certutil -hashfile "%STAGE_DIR%\git.7z.exe" SHA256 ^| findstr /v "CertUtil"') do call :set_computed_sha256 "%%A"
+:: certutil prints a header line, the digest, then a completion line.  Take the
+:: first line after the header rather than filtering the output by text: a cache
+:: path containing "CertUtil" would take the header out along with the
+:: completion line, leaving the digest as the line that gets skipped.
+for /f "skip=1 delims=" %%A in ('certutil -hashfile "%STAGE_DIR%\git.7z.exe" SHA256') do (
+    if not defined COMPUTED_SHA256 call :set_computed_sha256 "%%A"
+)
 
 if /i not "%COMPUTED_SHA256%"=="%GIT_EXPECTED_SHA256%" (
     echo. >&2
