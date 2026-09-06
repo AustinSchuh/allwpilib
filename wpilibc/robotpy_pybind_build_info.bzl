@@ -605,10 +605,10 @@ def wpilib_extension(srcs = [], header_to_dat_deps = [], extra_hdrs = [], includ
             ],
         ),
         struct(
-            class_name = "CANBus",
-            yml_file = "semiwrap/CANBus.yml",
+            class_name = "CANPort",
+            yml_file = "semiwrap/CANPort.yml",
             header_root = "$(execpath :robotpy-native-wpilib.copy_headers)",
-            header_file = "$(execpath :robotpy-native-wpilib.copy_headers)/wpi/hardware/bus/CANBus.hpp",
+            header_file = "$(execpath :robotpy-native-wpilib.copy_headers)/wpi/hardware/bus/CANPort.hpp",
             tmpl_class_names = [],
             trampolines = [],
         ),
@@ -2021,7 +2021,7 @@ def define_pybind_library(name, pkgcfgs = [], extra_pybind_hdrs = []):
         summary = "Binary wrapper for WPILib",
         project_urls = {"Source code": "https://github.com/robotpy/mostrobotpy"},
         author_email = "RobotPy Development Team <robotpy@googlegroups.com>",
-        requires = ["robotpy-native-wpilib==0.0.0", "robotpy-telemetry==0.0.0", "robotpy-tunables==0.0.0", "robotpy-wpiutil==0.0.0", "robotpy-wpimath==0.0.0", "robotpy-hal==0.0.0", "pyntcore==0.0.0", "robotpy-cli~=2027.0.0a1", "pytest>=3.9", "pytest-reraise"],
+        requires = ["robotpy-native-wpilib==0.0.0", "robotpy-telemetry==0.0.0", "robotpy-tunables==0.0.0", "robotpy-wpiutil==0.0.0", "robotpy-wpimath==0.0.0", "robotpy-hal==0.0.0", "pyntcore==0.0.0", "robotpy-cli==0.0.0", "pytest>=3.9", "pytest-reraise"],
         python_requires = ">=3.11",
         entry_points = {
             "pkg_config": ["wpilib = wpilib", "wpilib_simulation = wpilib.simulation"],

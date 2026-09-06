@@ -1,9 +1,9 @@
 [build-system]
 build-backend = "hatchling.build"
 requires = [
-    "semiwrap~=0.6.1",
-    "hatch-meson~=0.1.2",
-    "hatch-robotpy~=0.2.1",
+    "semiwrap==0.0.0",
+    "hatch-meson==0.0.0",
+    "hatch-robotpy==0.0.0",
     "hatchling",
     "robotpy-native-wpiutil==0.0.0",
 ]
@@ -81,6 +81,7 @@ RawFrame_c = "wpi/util/RawFrame.h"
 RawFrame = "wpi/util/RawFrame.hpp"
 Timestamp = "wpi/util/timestamp.hpp"
 Alert = "wpi/util/Alert.hpp"
+UsageReporting = "wpi/util/UsageReporting.hpp"
 
 WPyStruct = "src/wpistruct/wpystruct_fns.h"
 
