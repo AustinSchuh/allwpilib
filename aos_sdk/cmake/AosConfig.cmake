@@ -185,6 +185,10 @@ if(NOT TARGET aos::aos)
         target_link_libraries(aos::aos INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
         if(NOT APPLE)
             target_link_libraries(aos::aos INTERFACE rt m)
+        else()
+            # abseil's cctz reads the local time zone through CoreFoundation.
+            # LINK_ONLY keeps it out of the archives consumers combine.
+            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:-Wl,-framework,CoreFoundation>")
         endif()
     endif()
 endif()
