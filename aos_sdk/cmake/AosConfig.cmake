@@ -194,6 +194,25 @@ if(NOT TARGET aos::aos)
         # windows.h defines min and max as macros, which breaks
         # numeric_limits<>::min() in aos/time/time.h.
         target_compile_definitions(aos::aos INTERFACE NOMINMAX)
+
+        # Bazel attaches these as linkopts, which the archive does not carry:
+        # ws2_32, winmm and synchronization for AOS, dbghelp for Detours, and
+        # the rest for libuv.
+        target_link_libraries(
+            aos::aos
+            INTERFACE
+                advapi32
+                dbghelp
+                iphlpapi
+                ole32
+                psapi
+                shell32
+                synchronization
+                user32
+                userenv
+                winmm
+                ws2_32
+        )
     endif()
 endif()
 
