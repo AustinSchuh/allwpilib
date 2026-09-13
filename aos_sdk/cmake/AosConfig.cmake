@@ -188,7 +188,7 @@ if(NOT TARGET aos::aos)
         else()
             # abseil's cctz reads the local time zone through CoreFoundation.
             # LINK_ONLY keeps it out of the archives consumers combine.
-            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:-Wl,-framework,CoreFoundation>")
+            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:-framework CoreFoundation>")
         endif()
     elseif(WIN32)
         # windows.h defines min and max as macros, which breaks
