@@ -57,9 +57,15 @@ wpilib_cc_static_library(
 
 pkg_files(
     name = "aos-sdk-static-files",
-    srcs = [":static/aos"],
+    srcs = select({
+        "@wpilib_toolchains//conditions:osx": [":universal/libaos.a"],
+        "//conditions:default": [":static/aos"],
+    }),
     prefix = platform_prefix("static"),
-    strip_prefix = "static",
+    strip_prefix = select({
+        "@wpilib_toolchains//conditions:osx": "universal",
+        "//conditions:default": "static",
+    }),
 )
 
 # Rolling everything into one archive drops the alwayslink attribute, so these
