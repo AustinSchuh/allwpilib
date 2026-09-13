@@ -197,22 +197,24 @@ if(NOT TARGET aos::aos)
 
         # Bazel attaches these as linkopts, which the archive does not carry:
         # ws2_32, winmm and synchronization for AOS, dbghelp for Detours, and
-        # the rest for libuv.
-        target_link_libraries(
-            aos::aos
-            INTERFACE
-                advapi32
-                dbghelp
-                iphlpapi
-                ole32
-                psapi
-                shell32
-                synchronization
-                user32
-                userenv
-                winmm
-                ws2_32
+        # the rest for libuv. LINK_ONLY keeps them out of the archives consumers
+        # combine.
+        foreach(
+            _lib
+            advapi32
+            dbghelp
+            iphlpapi
+            ole32
+            psapi
+            shell32
+            synchronization
+            user32
+            userenv
+            winmm
+            ws2_32
         )
+            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:${_lib}>")
+        endforeach()
     endif()
 endif()
 
