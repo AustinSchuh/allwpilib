@@ -90,6 +90,17 @@ if(NOT AOS_LIBRARY)
     )
 endif()
 
+# The linker options AOS's dependencies declare, generated out of the Bazel
+# build for this platform. It ships in the same zip as the archive.
+if(NOT EXISTS "${AOS_LIBRARY_DIR}/AosLinkOptions.cmake")
+    message(
+        FATAL_ERROR
+        "No AosLinkOptions.cmake in ${AOS_LIBRARY_DIR}. The aos-sdk static zip "
+        "unzipped there predates it; unzip a current one."
+    )
+endif()
+include("${AOS_LIBRARY_DIR}/AosLinkOptions.cmake")
+
 # Flatc arguments and compile definitions, generated out of the Bazel build so
 # they cannot drift from it.
 include("${CMAKE_CURRENT_LIST_DIR}/AosGeneratedSettings.cmake")
@@ -170,7 +181,10 @@ if(NOT TARGET aos::aos)
 
     set_target_properties(aos::aos PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${AOS_INCLUDE_DIR}")
 
-    target_link_libraries(aos::aos INTERFACE ${_aos_alwayslink_targets} aos::archive)
+    target_link_libraries(
+        aos::aos
+        INTERFACE ${_aos_alwayslink_targets} aos::archive ${AOS_LINK_OPTIONS}
+    )
 
     # Not optional, and not only about aos/macros.h hard-erroring without
     # AOS_OS_NONE: FLATBUFFERS_MAX_ALIGNMENT and the lockless-queue defines
@@ -180,41 +194,10 @@ if(NOT TARGET aos::aos)
 
     target_compile_features(aos::aos INTERFACE cxx_std_20)
 
-    if(UNIX)
-        find_package(Threads REQUIRED)
-        target_link_libraries(aos::aos INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
-        if(NOT APPLE)
-            target_link_libraries(aos::aos INTERFACE rt m)
-        else()
-            # abseil's cctz reads the local time zone through CoreFoundation.
-            # LINK_ONLY keeps it out of the archives consumers combine.
-            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:-framework CoreFoundation>")
-        endif()
-    elseif(WIN32)
+    if(WIN32)
         # windows.h defines min and max as macros, which breaks
         # numeric_limits<>::min() in aos/time/time.h.
         target_compile_definitions(aos::aos INTERFACE NOMINMAX)
-
-        # Bazel attaches these as linkopts, which the archive does not carry:
-        # ws2_32, winmm and synchronization for AOS, dbghelp for Detours, and
-        # the rest for libuv. LINK_ONLY keeps them out of the archives consumers
-        # combine.
-        foreach(
-            _lib
-            advapi32
-            dbghelp
-            iphlpapi
-            ole32
-            psapi
-            shell32
-            synchronization
-            user32
-            userenv
-            winmm
-            ws2_32
-        )
-            target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:${_lib}>")
-        endforeach()
     endif()
 endif()
 

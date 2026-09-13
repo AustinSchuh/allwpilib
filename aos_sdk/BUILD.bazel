@@ -11,6 +11,7 @@ load(
     "aos_sdk_alwayslink_libraries",
     "aos_sdk_cmake_settings",
     "aos_sdk_headers",
+    "aos_sdk_link_options",
 )
 load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_static_library")
 load("//shared/bazel/rules:packaging.bzl", "package_binary_cc_project")
@@ -76,11 +77,21 @@ aos_sdk_alwayslink_libraries(
     deps = [":aos_runtime"],
 )
 
+# What a consumer has to link besides the archives. It depends on the platform,
+# so it ships next to them rather than in the headers zip.
+aos_sdk_link_options(
+    name = "link_options",
+    out = "AosLinkOptions.cmake",
+    prefix = platform_prefix("static"),
+    deps = [":aos_runtime"],
+)
+
 architectures_pkg_zip(
     name = "aos-sdk_static_zip",
     srcs = [
         ":alwayslink_libraries",
         ":aos-sdk-static-files",
+        ":link_options",
         "//:license_pkg_files",
     ],
 )

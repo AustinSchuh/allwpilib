@@ -109,6 +109,14 @@ carries the two things that must agree:
   layout defines. A consumer compiling without them gets headers that silently
   disagree with the archive they link against.
 
+What a consumer links besides the archives differs per platform, so it ships in
+the static zip instead, as `<os>/<arch>/static/AosLinkOptions.cmake`, written by
+`//aos_sdk:link_options`. `AOS_LINK_OPTIONS` is every `linkopts` entry reachable
+from `:aos_runtime` in that platform's configuration -- `-lrt` on Linux,
+CoreFoundation on macOS, `ws2_32.lib` on Windows -- each wrapped in
+`$<LINK_ONLY:>` so it reaches a link but not an archive that combines `aos::aos`
+with others.
+
 The header list and include paths come from `CcInfo` as well, so they track
 dependency changes on their own. Widening the SDK is a matter of adding to
 `:aos_runtime` in `aos_sdk/BUILD.bazel`.
