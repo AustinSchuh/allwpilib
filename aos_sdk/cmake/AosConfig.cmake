@@ -190,6 +190,10 @@ if(NOT TARGET aos::aos)
             # LINK_ONLY keeps it out of the archives consumers combine.
             target_link_libraries(aos::aos INTERFACE "$<LINK_ONLY:-Wl,-framework,CoreFoundation>")
         endif()
+    elseif(WIN32)
+        # windows.h defines min and max as macros, which breaks
+        # numeric_limits<>::min() in aos/time/time.h.
+        target_compile_definitions(aos::aos INTERFACE NOMINMAX)
     endif()
 endif()
 
