@@ -41,14 +41,3 @@ sh_binary(
         "ubsan",
     ]
 ]
-
-selects.config_setting_group(
-    name = "sanitizer",
-    match_any = [
-        ":asan",
-        ":msan",
-        ":tsan",
-        ":ubsan",
-    ],
-    visibility = ["//visibility:public"],
-)
