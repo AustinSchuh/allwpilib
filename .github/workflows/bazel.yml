@@ -36,6 +36,48 @@ jobs:
             os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
             container: wpilib/debian-base:trixie
             action: "test"
+          - name: "Linux Systemcore clang"
+            compilation_mode: opt
+            classifier: "linuxsystemcore,linuxsystemcorestatic"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "build"
+            config: "clang"
+          - name: "Linux x86-64 clang"
+            compilation_mode: opt
+            classifier: "linuxx86-64"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "test"
+            config: "clang"
+          - name: "Linux x86-64 asan"
+            compilation_mode: opt
+            classifier: "linuxx86-64"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "test"
+            config: "asan"
+          - name: "Linux x86-64 tsan"
+            compilation_mode: opt
+            classifier: "linuxx86-64"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "test"
+            config: "tsan"
+          - name: "Linux x86-64 ubsan"
+            compilation_mode: opt
+            classifier: "linuxx86-64"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "test"
+            config: "ubsan"
+          - name: "Linux x86-64 msan"
+            compilation_mode: opt
+            classifier: "linuxx86-64"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-4vcpu-ubuntu-2404', 'ubuntu-24.04') }}
+            container: wpilib/debian-base:trixie
+            action: "test"
+            config: "msan"
           - name: "macOS"
             compilation_mode: opt
             classifier: "osxuniversal,headers,sources,osxuniversalstatic,linuxsystemcore,linuxsystemcorestatic"
@@ -149,7 +191,8 @@ jobs:
           else
             TARGETS=...
           fi
-          bazel ${ACTION} -c ${{ matrix.compilation_mode }} ${TARGETS} --config=ci --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER='${{ matrix.classifier }}' --execution_log_compact_file="${{ matrix.name }} Exec Log.binpb.zst"
+          CONFIG='${{ matrix.config }}'
+          bazel ${ACTION} -c ${{ matrix.compilation_mode }} ${TARGETS} --config=ci ${CONFIG:+--config=${CONFIG}} --repo_env=WPI_PUBLISH_CLASSIFIER_FILTER='${{ matrix.classifier }}' --execution_log_compact_file="${{ matrix.name }} Exec Log.binpb.zst"
         shell: bash
 
       - uses: actions/upload-artifact@v7
