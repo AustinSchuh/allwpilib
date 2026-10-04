@@ -1,4 +1,11 @@
+# The sanitizers build with the hermetic clang. gcc's -Wmaybe-uninitialized
+# reports false positives in libstdc++ under them, which -Werror makes fatal.
+
 # ASAN (address sanitizer) config
+build:asan --config=clang
+build:asan --platform_suffix=clang-asan
+build:asan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
+build:asan --copt=-gline-tables-only
 build:asan --copt -fsanitize=address
 build:asan --copt -fno-omit-frame-pointer
 build:asan --linkopt -fsanitize=address
@@ -6,6 +13,10 @@ build:asan --build_tests_only
 build:asan --test_tag_filters=-no-asan
 
 # TSAN (thread sanitizer)
+build:tsan --config=clang
+build:tsan --platform_suffix=clang-tsan
+build:tsan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
+build:tsan --copt=-gline-tables-only
 build:tsan --strip=never
 build:tsan --copt -fsanitize=thread
 build:tsan --copt -DTHREAD_SANITIZER
@@ -18,6 +29,10 @@ build:tsan --build_tests_only
 build:tsan --test_tag_filters=-no-tsan
 
 # USAN (Undefined Behavior Sanitizer)
+build:ubsan --config=clang
+build:ubsan --platform_suffix=clang-ubsan
+build:ubsan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
+build:ubsan --copt=-gline-tables-only
 build:ubsan --copt -fsanitize=undefined
 build:ubsan --copt -fno-sanitize-recover=all
 build:ubsan --copt -fno-omit-frame-pointer

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Runs a sanitizer test with the runtimes pointed at the hermetic
+# llvm-symbolizer. Without it they fall back to addr2line, which takes minutes
+# on large binaries and can't read all of clang's DWARF.
+
+symbolizer="${RUNFILES_DIR}/@SYMBOLIZER@"
+export ASAN_OPTIONS="external_symbolizer_path=${symbolizer}${ASAN_OPTIONS:+:${ASAN_OPTIONS}}"
+export UBSAN_OPTIONS="external_symbolizer_path=${symbolizer}${UBSAN_OPTIONS:+:${UBSAN_OPTIONS}}"
+# The same options the CMake TSan job uses.
+export TSAN_OPTIONS="external_symbolizer_path=${symbolizer}:second_deadlock_stack=1:suppressions=${RUNFILES_DIR}/@TSAN_SUPPRESSIONS@${TSAN_OPTIONS:+:${TSAN_OPTIONS}}"
+
+exec "$@"

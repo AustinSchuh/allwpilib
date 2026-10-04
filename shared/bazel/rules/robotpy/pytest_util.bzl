@@ -10,6 +10,7 @@ def robotpy_py_test(name, srcs, tags = [], size = "small", **kwargs):
         tags = tags + [
             "no-asan",
             "no-tsan",
+            "no-ubsan",
             "robotpy",
         ],
         legacy_create_init = 0,

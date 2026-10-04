@@ -51,6 +51,7 @@ package_group(
 exports_files([
     "LICENSE.md",
     "ThirdPartyNotices.txt",
+    "tsan_suppressions.txt",
 ])
 
 alias(

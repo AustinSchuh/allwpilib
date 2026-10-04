@@ -1,0 +1,27 @@
+load("@bazel_lib//lib:expand_template.bzl", "expand_template")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+expand_template(
+    name = "sanitizer_test_wrapper_sh",
+    out = "sanitizer_test_wrapper.sh",
+    data = [
+        "//:tsan_suppressions.txt",
+        "@llvm_toolchain_llvm//:bin/llvm-symbolizer",
+    ],
+    is_executable = True,
+    substitutions = {
+        "@SYMBOLIZER@": "$(rlocationpath @llvm_toolchain_llvm//:bin/llvm-symbolizer)",
+        "@TSAN_SUPPRESSIONS@": "$(rlocationpath //:tsan_suppressions.txt)",
+    },
+    template = "sanitizer_test_wrapper.sh.in",
+)
+
+# Passed to the sanitizer configs as --run_under.
+sh_binary(
+    name = "sanitizer_test_wrapper",
+    srcs = [":sanitizer_test_wrapper_sh"],
+    data = [
+        "//:tsan_suppressions.txt",
+        "@llvm_toolchain_llvm//:bin/llvm-symbolizer",
+    ],
+)

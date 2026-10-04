@@ -3,6 +3,9 @@
 # download only happens under that config.
 bazel_dep(name = "toolchains_llvm", version = "1.11.0", dev_dependency = True)
 
+# For the sanitizer test wrapper.
+bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
+
 llvm = use_extension(
     "@toolchains_llvm//toolchain/extensions:llvm.bzl",
     "llvm",
@@ -53,4 +56,4 @@ llvm.toolchain(
     llvm_version = "22.1.8",
     stdlib = {"": "dynamic-stdc++"},
 )
-use_repo(llvm, "llvm_toolchain")
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
