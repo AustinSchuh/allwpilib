@@ -1,0 +1,56 @@
+# Hermetic clang, used only with --config=clang. Nothing registers these
+# toolchains; build:clang names them with --extra_toolchains, so the LLVM
+# download only happens under that config.
+bazel_dep(name = "toolchains_llvm", version = "1.11.0", dev_dependency = True)
+
+llvm = use_extension(
+    "@toolchains_llvm//toolchain/extensions:llvm.bzl",
+    "llvm",
+    dev_dependency = True,
+)
+
+# Without a sysroot, clang compiles against the host's glibc and links the
+# host's libstdc++, the same libraries the gcc toolchain uses. The flags below
+# restate what linux_flags.rc feeds the gcc toolchain through BAZEL_*OPTS,
+# which only reaches rules_cc's autoconf.
+llvm.toolchain(
+    name = "llvm_toolchain",
+    # Unlike the other flag attributes, conly_flags has no "" fallback; each
+    # target needs its own key.
+    conly_flags = {"linux-x86_64": [
+        # The HAL's C headers give enums a fixed underlying type.
+        "-Wno-c23-extensions",
+    ]},
+    cxx_standard = {"": "c++23"},
+    extra_compile_flags = {"": [
+        "-Wextra",
+        "-Werror",
+        "-gz=zlib",
+        "-Wformat=2",
+        "-pedantic",
+        "-Wno-psabi",
+        "-Wno-unused-parameter",
+        "-pthread",
+        # linux_flags.rc and the linux platforms pass gcc-only warning flags,
+        # which gcc ignores and clang warns about.
+        "-Wno-unknown-warning-option",
+        # abseil's headers use clang's nullability and enable_if extensions.
+        "-Wno-nullability-extension",
+        "-Wno-gcc-compat",
+    ]},
+    extra_cxx_flags = {"": [
+        "-Wno-deprecated-enum-enum-conversion",
+        "-Wno-array-bounds",
+    ]},
+    extra_link_flags = {"": [
+        "-rdynamic",
+        "-pthread",
+        "-ldl",
+        "-latomic",
+        "-Wl,-rpath,$ORIGIN",
+        "-gz=zlib",
+    ]},
+    llvm_version = "22.1.8",
+    stdlib = {"": "dynamic-stdc++"},
+)
+use_repo(llvm, "llvm_toolchain")
