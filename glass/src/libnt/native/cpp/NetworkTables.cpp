@@ -1095,10 +1095,10 @@ void NetworkTablesModel::Update() {
           status.ok = true;
           auto descriptor = entry->value.GetRaw();
           upb_DefPool_AddFile(
-              m_protoPool,
+              m_protoPool.get(),
               google_protobuf_FileDescriptorProto_parse(
                   reinterpret_cast<const char*>(descriptor.data()),
-                  descriptor.size(), m_arena),
+                  descriptor.size(), m_arena.get()),
               &status);
           if (!status.ok) {
             wpi::util::print("could not decode protobuf '{}' filename '{}'\n",

@@ -182,8 +182,8 @@ class NetworkTablesModel : public Model {
   wpi::util::StructDescriptorDatabase& GetStructDatabase() {
     return m_structDb;
   }
-  upb_DefPool* GetProtobufDatabase() { return m_protoPool; }
-  upb_Arena* GetProtobufArena() { return m_arena; }
+  upb_DefPool* GetProtobufDatabase() { return m_protoPool.get(); }
+  upb_Arena* GetProtobufArena() { return m_arena.get(); }
 
  private:
   void RebuildTree();
@@ -210,8 +210,14 @@ class NetworkTablesModel : public Model {
   std::optional<int64_t> m_serverTimeOffset;
 
   wpi::util::StructDescriptorDatabase m_structDb;
-  upb_DefPool* m_protoPool = upb_DefPool_New();
-  upb_Arena* m_arena = upb_Arena_New();
+  struct UpbDefPoolFree {
+    void operator()(upb_DefPool* pool) const { upb_DefPool_Free(pool); }
+  };
+  struct UpbArenaFree {
+    void operator()(upb_Arena* arena) const { upb_Arena_Free(arena); }
+  };
+  std::unique_ptr<upb_DefPool, UpbDefPoolFree> m_protoPool{upb_DefPool_New()};
+  std::unique_ptr<upb_Arena, UpbArenaFree> m_arena{upb_Arena_New()};
 };
 
 using NetworkTablesFlags = int;
