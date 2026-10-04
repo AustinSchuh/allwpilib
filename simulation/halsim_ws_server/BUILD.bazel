@@ -81,9 +81,6 @@ cc_test(
     name = "halsim_ws_server-test",
     size = "small",
     srcs = glob(["src/test/native/**/*.cpp"]),
-    tags = [
-        "no-asan",
-    ],
     deps = [
         ":halsim_ws_server",
         ":test_headers",

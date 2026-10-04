@@ -95,7 +95,6 @@ cc_test(
         exclude = ["src/test/native/imgui/**"],
     ),
     tags = [
-        "no-asan",
         "wpi-cpp-gui",
     ],
     deps = [

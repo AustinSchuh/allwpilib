@@ -187,10 +187,6 @@ cc_test(
         "src/generated/test/native/cpp/**",
         "src/test/native/cpp/**",
     ]),
-    tags = [
-        "no-tsan",
-        "no-ubsan",
-    ],
     deps = [
         ":test-headers",
         ":wpilibc",

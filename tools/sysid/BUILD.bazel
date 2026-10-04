@@ -67,9 +67,6 @@ cc_test(
     name = "sysid-test",
     size = "medium",
     srcs = glob(["src/test/native/cpp/**"]),
-    tags = [
-        "no-asan",
-    ],
     deps = [
         ":sysid-lib",
         "//thirdparty/catch2",

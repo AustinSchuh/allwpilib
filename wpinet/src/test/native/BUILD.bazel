@@ -22,7 +22,6 @@ cc_test(
             "cpp/MulticastTest.cpp",
         ],
     ),
-    tags = ["no-asan"],
     deps = [
         ":main",
         "//thirdparty/catch2",
