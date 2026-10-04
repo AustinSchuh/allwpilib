@@ -8,8 +8,11 @@
 #include <unistd.h>
 #endif
 
+#include <string>
 #include <utility>
 #include <vector>
+
+#include <uv.h>
 
 #include "WebSocketTest.hpp"
 #include "wpi/net/HttpParser.hpp"
@@ -17,11 +20,16 @@
 
 namespace wpi::net {
 
+// The process ID keeps test processes that run at the same time from binding
+// each other's pipe.
 #ifdef _WIN32
-const char* WebSocketTest::pipeName = "\\\\.\\pipe\\websocket-unit-test";
+static const std::string gPipeName =
+    "\\\\.\\pipe\\websocket-unit-test-" + std::to_string(uv_os_getpid());
 #else
-const char* WebSocketTest::pipeName = "/tmp/websocket-unit-test";
+static const std::string gPipeName =
+    "/tmp/websocket-unit-test-" + std::to_string(uv_os_getpid());
 #endif
+const char* WebSocketTest::pipeName = gPipeName.c_str();
 const uint8_t WebSocketTest::testMask[4] = {0x11, 0x22, 0x33, 0x44};
 
 void WebSocketTest::UnlinkPipe() {

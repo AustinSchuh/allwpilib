@@ -52,7 +52,10 @@ class WebSocketTest {
     failTimer->Unreference();
   }
 
-  ~WebSocketTest() { Finish(); }
+  ~WebSocketTest() {
+    Finish();
+    UnlinkPipe();
+  }
 
   void Finish() {
     loop->Walk([](uv::Handle& it) { it.Close(); });
