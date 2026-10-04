@@ -1,6 +1,7 @@
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//shared/bazel/rules:sanitizers.bzl", "incompatible_with_sanitizer")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 cc_library(
     name = "main",
@@ -31,17 +32,22 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "MulticastTest",
-    size = "small",
+cc_binary(
+    name = "MulticastTest_bin",
+    testonly = True,
     srcs = ["cpp/MulticastTest.cpp"],
-    tags = [
-        "no-remote-exec",  # requires avahi-daemon
-    ],
-    target_compatible_with = incompatible_with_sanitizer("asan"),
     deps = [
         ":main",
         "//thirdparty/catch2",
         "//wpinet",
     ],
+)
+
+# Needs an avahi daemon; multicast_test.sh starts one if none is running.
+sh_test(
+    name = "MulticastTest",
+    size = "small",
+    srcs = ["multicast_test.sh"],
+    args = ["$(rootpath :MulticastTest_bin)"],
+    data = [":MulticastTest_bin"],
 )
