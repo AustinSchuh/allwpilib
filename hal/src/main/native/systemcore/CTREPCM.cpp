@@ -35,7 +35,6 @@ static constexpr HAL_CANDeviceType deviceType =
 
 static constexpr int32_t Status1 = 0x50;
 static constexpr int32_t StatusSolFaults = 0x51;
-static constexpr int32_t StatusDebug = 0x52;
 
 static constexpr int32_t Control1 = 0x70;
 static constexpr int32_t Control2 = 0x71;

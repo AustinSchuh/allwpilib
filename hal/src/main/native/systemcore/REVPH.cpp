@@ -34,9 +34,6 @@ static constexpr HAL_CANDeviceType deviceType =
     HAL_CANDeviceType::HAL_CAN_DEV_PNEUMATICS;
 
 static constexpr int32_t DEFAULT_CONTROL_PERIOD = 20;
-static constexpr uint8_t DEFAULT_COMPRESSOR_DUTY = 255;
-static constexpr uint8_t DEFAULT_PRESSURE_TARGET = 120;
-static constexpr uint8_t DEFAULT_PRESSURE_HYSTERESIS = 60;
 
 #define HAL_REVPH_MAX_PULSE_TIME 65534
 

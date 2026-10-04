@@ -5,14 +5,9 @@
 #include "wpi/hal/IMU.h"
 
 #include <cstring>
-#include <numbers>
 
 #include "HALInitializer.hpp"
 #include "mrclib/IMU.h"
-
-namespace {
-constexpr double DEGREES_TO_RADIANS = std::numbers::pi / 180.0;
-}  // namespace
 
 namespace wpi::hal::init {
 void InitializeIMU() {}
