@@ -138,9 +138,6 @@ def build_tests(example_test_folders, snippet_test_folders):
             defines = ["RUNNING_WPILIB_TESTS=1"],
             tags = [
                 "wpi-example",
-                # NetworkTables never destroys its instance, so TSan reports
-                # its listener thread as leaked at exit.
-                "no-tsan",
                 "exclusive-if-local",
             ],
         )
@@ -163,9 +160,6 @@ def build_tests(example_test_folders, snippet_test_folders):
             defines = ["RUNNING_WPILIB_TESTS=1"],
             tags = [
                 "wpi-example",
-                # NetworkTables never destroys its instance, so TSan reports
-                # its listener thread as leaked at exit.
-                "no-tsan",
                 "exclusive-if-local",
             ],
         )

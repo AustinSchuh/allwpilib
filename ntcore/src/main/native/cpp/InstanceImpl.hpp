@@ -79,12 +79,10 @@ class InstanceImpl {
 
   struct Cleanup {
     ~Cleanup() {
-      for (auto&& inst : s_instances) {
-        // don't actually destroy (due to undefined global destruction order),
-        // but stop all listener threads
-        if (auto i = inst.load()) {
-          i->listenerStorage.Reset();
-        }
+      // Destroy the instances so their threads are joined. wpiutil's handle
+      // manager may already be gone, but its calls fail cleanly after that.
+      for (int i = 0; i < NUM_INSTANCES; ++i) {
+        Destroy(i);
       }
     }
   };
