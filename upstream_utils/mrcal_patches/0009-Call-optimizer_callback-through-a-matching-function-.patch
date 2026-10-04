@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Austin Schuh <austin.linux@gmail.com>
+Date: Sun, 4 Oct 2026 01:25:26 -0700
+Subject: [PATCH 9/9] Call optimizer_callback through a matching function type
+
+libdogleg calls the callback as dogleg_callback_t, whose context
+argument is void*. Calling optimizer_callback, which takes a
+const callback_context_t*, through that type is undefined behavior.
+---
+ mrcal.cpp | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/mrcal.cpp b/mrcal.cpp
+index c64425786a2cfe9d59a4baf6985b3a5033e9064e..71d2f6f402f1655ee3c72d6710bac9cd9fb0cf9f 100644
+--- a/mrcal.cpp
++++ b/mrcal.cpp
+@@ -5976,6 +5976,15 @@ void optimizer_callback(// input state
+     }
+ }
+ 
++// libdogleg calls this through dogleg_callback_t, so its type must match exactly
++static void optimizer_callback_dogleg(const double*   packed_state,
++                                      double*         x,
++                                      cholmod_sparse* Jt,
++                                      void*           cookie)
++{
++    optimizer_callback(packed_state, x, Jt, (const callback_context_t*)cookie);
++}
++
+ bool mrcal_optimizer_callback(// out
+ 
+                              // These output pointers may NOT be NULL, unlike
+@@ -6440,7 +6449,7 @@ mrcal_optimize( // out
+ 
+             norm2_error = dogleg_optimize2(packed_state.data(),
+                                            Nstate, ctx.Nmeasurements, ctx.N_j_nonzero,
+-                                           (dogleg_callback_t*)&optimizer_callback, &ctx,
++                                           &optimizer_callback_dogleg, &ctx,
+                                            &dogleg_parameters,
+                                            &solver_context);
+ 
+@@ -6611,7 +6620,7 @@ mrcal_optimize( // out
+         for(int ivar=0; ivar<Nstate; ivar++)
+             dogleg_testGradient(ivar, packed_state.data(),
+                                 Nstate, ctx.Nmeasurements, ctx.N_j_nonzero,
+-                                (dogleg_callback_t*)&optimizer_callback, &ctx);
++                                &optimizer_callback_dogleg, &ctx);
+ 
+     stats.rms_reproj_error__pixels =
+ #if defined ENABLE_TRIANGULATED_WARNINGS && ENABLE_TRIANGULATED_WARNINGS
