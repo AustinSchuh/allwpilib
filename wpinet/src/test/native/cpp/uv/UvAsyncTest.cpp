@@ -48,7 +48,6 @@ TEST_CASE("UvAsyncTest CallbackOnly", "[uv][async]") {
   std::atomic_bool fail{false};
 
   wpi::util::mutex mutex;
-  mutex.lock();
 
   std::thread theThread;
 
@@ -79,7 +78,6 @@ TEST_CASE("UvAsyncTest CallbackOnly", "[uv][async]") {
         std::this_thread::yield();
       }
     });
-    mutex.unlock();
   });
   prepare->Start();
 
