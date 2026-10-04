@@ -170,9 +170,9 @@ wpilib_cc_library(
         "//apriltag",
         "//fields",
         "//shared/bazel/thirdparty/ceres",
+        "//shared/bazel/thirdparty/opencv",
         "//wpigui",
         "//wpiutil",
-        "@bzlmodrio-opencv//libraries/cpp/opencv",
     ],
 )
 
@@ -203,9 +203,9 @@ cc_library(
         "//apriltag",
         "//fields",
         "//shared/bazel/thirdparty/ceres",
+        "//shared/bazel/thirdparty/opencv",
         "//wpigui:wpigui_for_tests",
         "//wpiutil",
-        "@bzlmodrio-opencv//libraries/cpp/opencv",
     ],
 )
 

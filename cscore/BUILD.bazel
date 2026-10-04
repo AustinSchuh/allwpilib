@@ -55,9 +55,9 @@ wpilib_objc_library(
         "IOKit",
     ],
     deps = [
+        "//shared/bazel/thirdparty/opencv",
         "//wpinet",
         "//wpiutil",
-        "@bzlmodrio-opencv//libraries/cpp/opencv",
     ],
 )
 
@@ -78,9 +78,9 @@ wpilib_cc_library(
     strip_include_prefix = "src/main/native/include",
     visibility = ["//visibility:public"],
     deps = [
+        "//shared/bazel/thirdparty/opencv",
         "//wpinet",
         "//wpiutil",
-        "@bzlmodrio-opencv//libraries/cpp/opencv",
     ] + select({
         "@platforms//os:osx": [":cscore-mac"],
         "//conditions:default": [],

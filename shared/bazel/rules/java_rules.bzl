@@ -72,6 +72,6 @@ def wpilib_java_junit5_test(
         main_class = "org.junit.platform.console.ConsoleLauncher",
         use_testrunner = False,
         testonly = True,
-        tags = tags + ["allwpilib-build-java", "no-asan", "no-tsan", "no-ubsan"],
+        tags = tags + ["allwpilib-build-java", "no-asan", "no-msan", "no-tsan", "no-ubsan"],
         **kwargs
     )

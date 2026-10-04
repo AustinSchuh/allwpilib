@@ -25,3 +25,10 @@ sh_binary(
         "@llvm_toolchain_llvm//:bin/llvm-symbolizer",
     ],
 )
+
+# Matches --config=msan, which builds with the toolchain's msan feature.
+config_setting(
+    name = "msan",
+    values = {"features": "msan"},
+    visibility = ["//visibility:public"],
+)

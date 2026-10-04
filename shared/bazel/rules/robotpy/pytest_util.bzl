@@ -9,6 +9,7 @@ def robotpy_py_test(name, srcs, tags = [], size = "small", **kwargs):
         target_compatible_with = robotpy_compatibility_select(),
         tags = tags + [
             "no-asan",
+            "no-msan",
             "no-tsan",
             "no-ubsan",
             "robotpy",

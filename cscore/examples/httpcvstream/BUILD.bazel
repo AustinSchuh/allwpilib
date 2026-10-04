@@ -8,7 +8,7 @@ cc_binary(
     ],
     deps = [
         "//cscore",
+        "//shared/bazel/thirdparty/opencv",
         "//wpiutil",
-        "@bzlmodrio-opencv//libraries/cpp/opencv",
     ],
 )

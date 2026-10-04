@@ -25,6 +25,15 @@ using namespace wpi::net;
 #endif
 
 AvahiFunctionTable::AvahiFunctionTable() {
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+  // The system's avahi isn't built with MemorySanitizer, so MSan can't see
+  // its writes and reports them as uninitialized. Run without mDNS instead.
+  valid = false;
+  return;
+#endif
+#endif
+
   void* lib = dlopen("libavahi-common.so.3", RTLD_LAZY);
 
   valid = false;

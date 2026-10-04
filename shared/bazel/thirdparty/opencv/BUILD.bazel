@@ -1,0 +1,13 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# The prebuilt OpenCV, which is linked against libstdc++. MSan builds use an
+# instrumented libc++ instead, so nothing that links OpenCV can build there.
+cc_library(
+    name = "opencv",
+    target_compatible_with = select({
+        "//shared/bazel/toolchains/llvm:msan": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["@bzlmodrio-opencv//libraries/cpp/opencv"],
+)

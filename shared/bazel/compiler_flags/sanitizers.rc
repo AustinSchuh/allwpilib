@@ -40,3 +40,18 @@ build:ubsan --linkopt -fsanitize=undefined
 build:ubsan --linkopt -fno-sanitize-recover=all
 build:ubsan --build_tests_only
 build:ubsan --test_tag_filters=-no-ubsan
+
+# MSAN (memory sanitizer). The toolchain's msan feature swaps libstdc++ for
+# an instrumented libc++, so anything linking a prebuilt libstdc++ library
+# (OpenCV) can't build under it.
+build:msan --config=clang
+build:msan --platform_suffix=clang-msan
+build:msan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
+build:msan --copt=-gline-tables-only
+build:msan --features=msan
+# The opt flags define _FORTIFY_SOURCE, which routes memcpy and friends
+# through glibc's uninstrumented *_chk functions. MSan doesn't see those
+# stores and reports the destination as uninitialized.
+build:msan --copt=-U_FORTIFY_SOURCE
+build:msan --build_tests_only
+build:msan --test_tag_filters=-no-msan

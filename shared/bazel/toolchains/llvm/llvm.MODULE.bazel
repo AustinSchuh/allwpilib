@@ -12,10 +12,10 @@ llvm = use_extension(
     dev_dependency = True,
 )
 
-# Without a sysroot, clang compiles against the host's glibc and links the
-# host's libstdc++, the same libraries the gcc toolchain uses. The flags below
-# restate what linux_flags.rc feeds the gcc toolchain through BAZEL_*OPTS,
-# which only reaches rules_cc's autoconf.
+# Clang compiles against the host's glibc and links the host's libstdc++ 14
+# (Debian trixie, as on RBE), the same libraries the gcc toolchain uses. The
+# flags below restate what linux_flags.rc feeds the gcc toolchain through
+# BAZEL_*OPTS, which only reaches rules_cc's autoconf.
 llvm.toolchain(
     name = "llvm_toolchain",
     # Unlike the other flag attributes, conly_flags has no "" fallback; each
@@ -53,7 +53,20 @@ llvm.toolchain(
         "-Wl,-rpath,$ORIGIN",
         "-gz=zlib",
     ]},
+    # MemorySanitizer-instrumented libc++, which --features=msan swaps in.
+    libcxx_sha256 = "fd1ac49eeda4edc6deeda2037998e558718a63a5054fff4fdace7751b270217a",
+    libcxx_url = "https://github.com/RealtimeRoboticsGroup/toolchains/releases/download/22.1.8/libcxx-msan-22.1.8-x86_64-linux-gnu-ubuntu-22.04.tar.zst",
     llvm_version = "22.1.8",
-    stdlib = {"": "dynamic-stdc++"},
+    # Naming the version makes the toolchain find libstdc++ by path rather
+    # than pass -stdlib=libstdc++, so msan can drop it for its libc++.
+    stdlib = {"": "dynamic-stdc++-14"},
+)
+
+# The host's root, so the libstdc++ paths dynamic-stdc++-14 generates are
+# absolute.
+llvm.sysroot(
+    name = "llvm_toolchain",
+    path = "/",
+    targets = ["linux-x86_64"],
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")

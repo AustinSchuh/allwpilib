@@ -99,6 +99,7 @@ def robotpy_project(
         size = size,
         tags = tags + [
             "no-asan",
+            "no-msan",
             "no-tsan",
             "no-ubsan",
         ],
