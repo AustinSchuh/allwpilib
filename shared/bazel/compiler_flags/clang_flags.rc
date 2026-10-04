@@ -1,5 +1,7 @@
 ###############################
-# Hermetic clang (Linux x86_64)
+# Hermetic clang (Linux x86_64 and SystemCore)
 ###############################
 build:clang --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
+# SystemCore, with --config=systemcore.
+build:clang --extra_toolchains=@llvm_toolchain//:cc-toolchain-aarch64-linux
 build:clang --platform_suffix=clang

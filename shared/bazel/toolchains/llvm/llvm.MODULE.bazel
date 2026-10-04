@@ -20,10 +20,16 @@ llvm.toolchain(
     name = "llvm_toolchain",
     # Unlike the other flag attributes, conly_flags has no "" fallback; each
     # target needs its own key.
-    conly_flags = {"linux-x86_64": [
-        # The HAL's C headers give enums a fixed underlying type.
-        "-Wno-c23-extensions",
-    ]},
+    conly_flags = {
+        target: [
+            # The HAL's C headers give enums a fixed underlying type.
+            "-Wno-c23-extensions",
+        ]
+        for target in [
+            "linux-aarch64",
+            "linux-x86_64",
+        ]
+    },
     cxx_standard = {"": "c++23"},
     extra_compile_flags = {"": [
         "-Wextra",
@@ -57,9 +63,14 @@ llvm.toolchain(
     libcxx_sha256 = "fd1ac49eeda4edc6deeda2037998e558718a63a5054fff4fdace7751b270217a",
     libcxx_url = "https://github.com/RealtimeRoboticsGroup/toolchains/releases/download/22.1.8/libcxx-msan-22.1.8-x86_64-linux-gnu-ubuntu-22.04.tar.zst",
     llvm_version = "22.1.8",
-    # Naming the version makes the toolchain find libstdc++ by path rather
-    # than pass -stdlib=libstdc++, so msan can drop it for its libc++.
-    stdlib = {"": "dynamic-stdc++-14"},
+    stdlib = {
+        # SystemCore's sysroot keeps libstdc++ in a Buildroot layout that clang
+        # finds on its own.
+        "linux-aarch64": "dynamic-stdc++",
+        # Naming the version makes the toolchain find libstdc++ by path rather
+        # than pass -stdlib=libstdc++, so msan can drop it for its libc++.
+        "linux-x86_64": "dynamic-stdc++-14",
+    },
 )
 
 # The host's root, so the libstdc++ paths dynamic-stdc++-14 generates are
@@ -68,5 +79,34 @@ llvm.sysroot(
     name = "llvm_toolchain",
     path = "/",
     targets = ["linux-x86_64"],
+)
+
+# SystemCore: the sysroot from the same opensdk toolchain the gcc build uses,
+# and only for the SystemCore platform, not other arm64 Linux targets.
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "systemcore_sysroot",
+    build_file_content = """filegroup(
+    name = "sysroot",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    dev_dependency = True,
+    sha256 = "992d4f2037762588c062f5b22f282b92b9143a2e8cb39a2027e67249c8ed5bea",
+    strip_prefix = "systemcore/aarch64-linux-gnu/sysroot",
+    url = "https://github.com/wpilibsuite/opensdk/releases/download/v2027-1/arm64-systemcore-2027-x86_64-linux-gnu-Toolchain-14.3.0.tgz",
+)
+
+llvm.sysroot(
+    name = "llvm_toolchain",
+    label = "@systemcore_sysroot//:sysroot",
+    targets = ["linux-aarch64"],
+)
+llvm.extra_target_compatible_with(
+    name = "llvm_toolchain",
+    constraints = ["@wpilib_toolchains//constraints/is_systemcore:true"],
+    targets = ["linux-aarch64"],
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
