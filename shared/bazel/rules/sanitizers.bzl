@@ -1,18 +1,4 @@
-"""target_compatible_with values for targets that can't run under sanitizers."""
-
-def incompatible_with_sanitizer(sanitizer):
-    """Excludes a target from one sanitizer's build.
-
-    Args:
-      sanitizer: asan, msan, tsan or ubsan.
-
-    Returns:
-      A select for target_compatible_with.
-    """
-    return select({
-        Label("//shared/bazel/toolchains/llvm:" + sanitizer): ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    })
+"""Sanitizer support for tests of an uninstrumented interpreter, such as Python."""
 
 _RUNTIME_DIR = "@llvm_toolchain_llvm//:lib/clang/22/lib/x86_64-unknown-linux-gnu/"
 
