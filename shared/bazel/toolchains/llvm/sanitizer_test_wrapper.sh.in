@@ -10,4 +10,12 @@ export UBSAN_OPTIONS="external_symbolizer_path=${symbolizer}${UBSAN_OPTIONS:+:${
 # The same options the CMake TSan job uses.
 export TSAN_OPTIONS="external_symbolizer_path=${symbolizer}:second_deadlock_stack=1:suppressions=${RUNFILES_DIR}/@TSAN_SUPPRESSIONS@${TSAN_OPTIONS:+:${TSAN_OPTIONS}}"
 
+# Tests of an uninstrumented interpreter, such as Python, name the shared
+# sanitizer runtime to preload for the instrumented code they load. The
+# interpreter itself leaks, so don't report leaks.
+if [[ -n "${WPI_SANITIZER_PRELOAD:-}" ]]; then
+  export LD_PRELOAD="${RUNFILES_DIR}/${WPI_SANITIZER_PRELOAD}${LD_PRELOAD:+:${LD_PRELOAD}}"
+  export ASAN_OPTIONS="${ASAN_OPTIONS}:detect_leaks=0"
+fi
+
 exec "$@"

@@ -1,5 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//shared/bazel/rules:sanitizers.bzl", "incompatible_with_sanitizers")
+load("//shared/bazel/rules:sanitizers.bzl", "incompatible_with_unpreloadable_sanitizers", "sanitizer_preload_data", "sanitizer_preload_env")
 
 visibility([
     "//developerRobot/...",
@@ -94,13 +94,14 @@ def robotpy_project(
         name = name + "-test",
         srcs = test_srcs + executable_srcs,
         main = _CLI_MAIN,
-        data = test_data + executable_data,
+        data = test_data + executable_data + sanitizer_preload_data(),
         args = main_option + ["test"] + test_options,
         deps = test_deps + executable_deps,
         size = size,
         tags = tags,
-        # The interpreter isn't instrumented, so it can't load extensions built
-        # with a sanitizer.
-        target_compatible_with = incompatible_with_sanitizers(),
+        # The interpreter isn't instrumented, so it preloads the sanitizer
+        # runtime for the extensions it loads.
+        env = sanitizer_preload_env(),
+        target_compatible_with = incompatible_with_unpreloadable_sanitizers(),
         **kwargs
     )
