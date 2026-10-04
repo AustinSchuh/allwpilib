@@ -1,4 +1,5 @@
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 expand_template(
@@ -26,9 +27,28 @@ sh_binary(
     ],
 )
 
-# Matches --config=msan, which builds with the toolchain's msan feature.
-config_setting(
-    name = "msan",
-    values = {"features": "msan"},
+# Match the sanitizer configs, which enable the toolchain's sanitizer features.
+[
+    config_setting(
+        name = sanitizer,
+        values = {"features": sanitizer},
+        visibility = ["//visibility:public"],
+    )
+    for sanitizer in [
+        "asan",
+        "msan",
+        "tsan",
+        "ubsan",
+    ]
+]
+
+selects.config_setting_group(
+    name = "sanitizer",
+    match_any = [
+        ":asan",
+        ":msan",
+        ":tsan",
+        ":ubsan",
+    ],
     visibility = ["//visibility:public"],
 )

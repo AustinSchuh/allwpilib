@@ -1,4 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("//shared/bazel/rules:sanitizers.bzl", "incompatible_with_sanitizers")
 
 visibility([
     "//developerRobot/...",
@@ -97,11 +98,9 @@ def robotpy_project(
         args = main_option + ["test"] + test_options,
         deps = test_deps + executable_deps,
         size = size,
-        tags = tags + [
-            "no-asan",
-            "no-msan",
-            "no-tsan",
-            "no-ubsan",
-        ],
+        tags = tags,
+        # The interpreter isn't instrumented, so it can't load extensions built
+        # with a sanitizer.
+        target_compatible_with = incompatible_with_sanitizers(),
         **kwargs
     )

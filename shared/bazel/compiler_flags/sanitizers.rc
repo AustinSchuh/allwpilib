@@ -1,16 +1,23 @@
 # The sanitizers build with the hermetic clang. gcc's -Wmaybe-uninitialized
 # reports false positives in libstdc++ under them, which -Werror makes fatal.
+#
+# Each enables the toolchain's sanitizer feature, which Bazel resets in the
+# exec configuration, so build tools stay uninstrumented. Targets that can't
+# run under a sanitizer select on //shared/bazel/toolchains/llvm:<sanitizer>
+# in target_compatible_with (see shared/bazel/rules/sanitizers.bzl).
+#
+# Each also builds only tests. The publishing targets transition to other
+# platforms, such as SystemCore's gcc, where the sanitizer features carry over
+# and don't build.
 
 # ASAN (address sanitizer) config
 build:asan --config=clang
 build:asan --platform_suffix=clang-asan
 build:asan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
 build:asan --copt=-gline-tables-only
-build:asan --copt -fsanitize=address
+build:asan --features=asan
 build:asan --copt -fno-omit-frame-pointer
-build:asan --linkopt -fsanitize=address
 build:asan --build_tests_only
-build:asan --test_tag_filters=-no-asan
 
 # TSAN (thread sanitizer)
 build:tsan --config=clang
@@ -18,28 +25,24 @@ build:tsan --platform_suffix=clang-tsan
 build:tsan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
 build:tsan --copt=-gline-tables-only
 build:tsan --strip=never
-build:tsan --copt -fsanitize=thread
+build:tsan --features=tsan
 build:tsan --copt -DTHREAD_SANITIZER
 build:tsan --copt -DDYNAMIC_ANNOTATIONS_ENABLED=1
 build:tsan --copt -DDYNAMIC_ANNOTATIONS_EXTERNAL_IMPL=1
 build:tsan --copt -O1
 build:tsan --copt -fno-omit-frame-pointer
-build:tsan --linkopt -fsanitize=thread
 build:tsan --build_tests_only
-build:tsan --test_tag_filters=-no-tsan
 
 # USAN (Undefined Behavior Sanitizer)
 build:ubsan --config=clang
 build:ubsan --platform_suffix=clang-ubsan
 build:ubsan --run_under=//shared/bazel/toolchains/llvm:sanitizer_test_wrapper
 build:ubsan --copt=-gline-tables-only
-build:ubsan --copt -fsanitize=undefined
+build:ubsan --features=ubsan
 build:ubsan --copt -fno-sanitize-recover=all
 build:ubsan --copt -fno-omit-frame-pointer
-build:ubsan --linkopt -fsanitize=undefined
 build:ubsan --linkopt -fno-sanitize-recover=all
 build:ubsan --build_tests_only
-build:ubsan --test_tag_filters=-no-ubsan
 
 # MSAN (memory sanitizer). The toolchain's msan feature swaps libstdc++ for
 # an instrumented libc++, so anything linking a prebuilt libstdc++ library
@@ -54,4 +57,3 @@ build:msan --features=msan
 # stores and reports the destination as uninitialized.
 build:msan --copt=-U_FORTIFY_SOURCE
 build:msan --build_tests_only
-build:msan --test_tag_filters=-no-msan

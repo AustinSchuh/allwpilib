@@ -83,6 +83,7 @@ def wpilib_imgui_cc_test(
         deps = [],
         defines = [],
         tags = [],
+        target_compatible_with = [],
         **kwargs):
     binary_name = name + "_binary"
     test_env = dict(IMGUI_TEST_ENV)
@@ -96,7 +97,7 @@ def wpilib_imgui_cc_test(
         "env": test_env,
         "env_inherit": kwargs.pop("env_inherit", []),
         "tags": test_tags,
-        "target_compatible_with": imgui_test_target_compatible_with(),
+        "target_compatible_with": imgui_test_target_compatible_with() + target_compatible_with,
         "testonly": True,
     }
     size = kwargs.pop("size", None)
@@ -113,7 +114,7 @@ def wpilib_imgui_cc_test(
         defines = defines + ["RUNNING_IMGUI_TESTS"],
         deps = deps + ["//wpigui:wpigui_test_runner"],
         tags = test_tags + ["manual"],
-        target_compatible_with = imgui_test_target_compatible_with(),
+        target_compatible_with = imgui_test_target_compatible_with() + target_compatible_with,
         **kwargs
     )
 
