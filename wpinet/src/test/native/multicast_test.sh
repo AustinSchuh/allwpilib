@@ -1,8 +1,9 @@
 #!/bin/bash
-# Runs MulticastTest with an avahi daemon to talk to. If none is running,
-# starts a private one: in a user and mount namespace with its own /run, a
-# system D-Bus for it to register on, and avahi-daemon, both stopped when the
-# test finishes. That needs no root, so it works in the RBE container.
+# Runs MulticastTest with an mDNS daemon to talk to. macOS always runs
+# mDNSResponder. On Linux, if no avahi daemon is running, starts a private one:
+# in a user and mount namespace with its own /run, a system D-Bus for it to
+# register on, and avahi-daemon, both stopped when the test finishes. That
+# needs no root, so it works in the RBE container.
 
 set -euo pipefail
 
@@ -62,6 +63,11 @@ fi
 
 test_binary="$1"
 shift
+
+# macOS always runs mDNSResponder.
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  exec "${test_binary}" "$@"
+fi
 
 if avahi-daemon --check 2>/dev/null; then
   exec "${test_binary}" "$@"

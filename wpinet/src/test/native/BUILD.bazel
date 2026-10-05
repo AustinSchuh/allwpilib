@@ -43,7 +43,8 @@ cc_binary(
     ],
 )
 
-# Needs an avahi daemon; multicast_test.sh starts one if none is running.
+# Needs an mDNS daemon. On Linux, multicast_test.sh starts avahi if none is
+# running.
 sh_test(
     name = "MulticastTest",
     size = "small",
