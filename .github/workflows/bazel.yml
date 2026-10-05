@@ -90,6 +90,13 @@ jobs:
             os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-6vcpu-macos-15', 'macOS-15') }}
             container: ""
             action: "test"
+          - name: "macOS Systemcore clang"
+            compilation_mode: opt
+            classifier: "linuxsystemcore,linuxsystemcorestatic"
+            os: ${{ case(github.repository_owner == 'wpilibsuite', 'blacksmith-6vcpu-macos-15', 'macOS-15') }}
+            container: ""
+            action: "build"
+            config: "clang"
           - name: "Windows x86-64"
             compilation_mode: opt
             classifier: "windowsx86-64,windowsx86-64static,headers,sources"
