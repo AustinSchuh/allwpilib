@@ -7,7 +7,7 @@ common:macos --repo_env=BAZEL_CXXOPTS="-std=c++23:-pedantic:-Wno-unused-paramete
 # C only
 common:macos --repo_env=BAZEL_CONLYOPTS="-pedantic:-Wno-unused-parameter:-Wno-missing-field-initializers:-Wno-unused-private-field"
 
-common:macos --repo_env=BAZEL_LINKOPTS="-Wl,-rpath,'@loader_path'"
+common:macos --repo_env=BAZEL_LINKOPTS="-Wl,-rpath,@loader_path"
 
 common:macos --host_per_file_copt=external/.*@-Wno-pedantic,-Wno-deprecated-declarations
 common:macos --per_file_copt=external/.*@-Wno-pedantic,-Wno-deprecated-declarations
