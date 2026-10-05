@@ -41,3 +41,38 @@ sh_binary(
         "ubsan",
     ]
 ]
+
+# macOS starts an interpreter test through /usr/bin/env, which SIP protects,
+# so the DYLD_INSERT_LIBRARIES the shared runtime would need never reaches the
+# interpreter.
+[
+    selects.config_setting_group(
+        name = sanitizer + "_macos",
+        match_all = [
+            ":" + sanitizer,
+            "@platforms//os:macos",
+        ],
+        visibility = ["//visibility:public"],
+    )
+    for sanitizer in [
+        "asan",
+        "ubsan",
+    ]
+]
+
+# The shared sanitizer runtimes an uninstrumented interpreter preloads for the
+# instrumented code it loads (see shared/bazel/rules/sanitizers.bzl).
+[
+    alias(
+        name = sanitizer + "_runtime",
+        actual = select({
+            "@platforms//os:macos": "@llvm_toolchain_llvm//:lib/clang/22/lib/darwin/libclang_rt.{}_osx_dynamic.dylib".format(sanitizer),
+            "//conditions:default": "@llvm_toolchain_llvm//:lib/clang/22/lib/x86_64-unknown-linux-gnu/libclang_rt.{}.so".format(linux_name),
+        }),
+        visibility = ["//visibility:public"],
+    )
+    for sanitizer, linux_name in [
+        ("asan", "asan"),
+        ("ubsan", "ubsan_standalone"),
+    ]
+]

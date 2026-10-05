@@ -6,16 +6,69 @@ bazel_dep(name = "toolchains_llvm", version = "1.11.0", dev_dependency = True)
 # For the sanitizer test wrapper.
 bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
 
+# Testing pins: the darwin toolchain built on apple_support, and the C++20
+# module support it needs in apple_support and rules_cc, before any of them is
+# released.
+local_path_override(
+    module_name = "toolchains_llvm",
+    path = "../toolchains_llvm",
+)
+
+local_path_override(
+    module_name = "apple_support",
+    path = "../apple_support",
+)
+
+local_path_override(
+    module_name = "rules_cc",
+    path = "../rules_cc",
+)
+
 llvm = use_extension(
     "@toolchains_llvm//toolchain/extensions:llvm.bzl",
     "llvm",
     dev_dependency = True,
 )
 
-# Clang compiles against the host's glibc and links the host's libstdc++ 14
-# (Debian trixie, as on RBE), the same libraries the gcc toolchain uses. The
-# flags below restate what linux_flags.rc feeds the gcc toolchain through
-# BAZEL_*OPTS, which only reaches rules_cc's autoconf.
+# The flags below restate what linux_flags.rc and osx_flags.rc feed the default
+# toolchains through BAZEL_*OPTS, which only reaches rules_cc's autoconf.
+_COMPILE_FLAGS = [
+    "-Wextra",
+    "-Werror",
+    "-pedantic",
+    "-Wno-unused-parameter",
+    "-pthread",
+    # abseil's headers use clang's nullability and enable_if extensions.
+    "-Wno-nullability-extension",
+    "-Wno-gcc-compat",
+]
+
+_LINUX_COMPILE_FLAGS = _COMPILE_FLAGS + [
+    "-gz=zlib",
+    "-Wformat=2",
+    "-Wno-psabi",
+    # linux_flags.rc and the linux platforms pass gcc-only warning flags,
+    # which gcc ignores and clang warns about.
+    "-Wno-unknown-warning-option",
+]
+
+_LINUX_LINK_FLAGS = [
+    "-rdynamic",
+    "-pthread",
+    "-ldl",
+    "-latomic",
+    "-Wl,-rpath,$ORIGIN",
+    "-gz=zlib",
+]
+
+_LINUX_TARGETS = [
+    "linux-aarch64",
+    "linux-x86_64",
+]
+
+# On Linux, clang compiles against the host's glibc and links the host's
+# libstdc++ 14 (Debian trixie, as on RBE), the same libraries the gcc toolchain
+# uses. On macOS, it uses the SDK's libc++, as Apple clang does.
 llvm.toolchain(
     name = "llvm_toolchain",
     # Unlike the other flag attributes, conly_flags has no "" fallback; each
@@ -25,45 +78,48 @@ llvm.toolchain(
             # The HAL's C headers give enums a fixed underlying type.
             "-Wno-c23-extensions",
         ]
-        for target in [
-            "linux-aarch64",
-            "linux-x86_64",
-        ]
+        for target in _LINUX_TARGETS + ["darwin-aarch64"]
     },
     cxx_standard = {"": "c++23"},
-    extra_compile_flags = {"": [
-        "-Wextra",
-        "-Werror",
-        "-gz=zlib",
-        "-Wformat=2",
-        "-pedantic",
-        "-Wno-psabi",
-        "-Wno-unused-parameter",
-        "-pthread",
-        # linux_flags.rc and the linux platforms pass gcc-only warning flags,
-        # which gcc ignores and clang warns about.
-        "-Wno-unknown-warning-option",
-        # abseil's headers use clang's nullability and enable_if extensions.
-        "-Wno-nullability-extension",
-        "-Wno-gcc-compat",
-    ]},
-    extra_cxx_flags = {"": [
-        "-Wno-deprecated-enum-enum-conversion",
-        "-Wno-array-bounds",
-    ]},
-    extra_link_flags = {"": [
-        "-rdynamic",
-        "-pthread",
-        "-ldl",
-        "-latomic",
-        "-Wl,-rpath,$ORIGIN",
-        "-gz=zlib",
-    ]},
+    extra_compile_flags = {
+        target: _LINUX_COMPILE_FLAGS
+        for target in _LINUX_TARGETS
+    } | {
+        "darwin-aarch64": _COMPILE_FLAGS + [
+            "-Wno-shorten-64-to-32",
+            # Catch2 suppresses this for __COUNTER__ on clang 22, but not
+            # when __APPLE__ is defined, taking that to mean Apple clang.
+            "-Wno-c2y-extensions",
+        ],
+    },
+    extra_cxx_flags = {
+        target: [
+            "-Wno-deprecated-enum-enum-conversion",
+            "-Wno-array-bounds",
+        ]
+        for target in _LINUX_TARGETS
+    } | {
+        "darwin-aarch64": [
+            "-Wno-deprecated-enum-enum-conversion",
+            "-Wno-deprecated-anon-enum-enum-conversion",
+            "-Wno-missing-field-initializers",
+        ],
+    },
+    extra_link_flags = {
+        target: _LINUX_LINK_FLAGS
+        for target in _LINUX_TARGETS
+    } | {
+        "darwin-aarch64": [
+            "-Wl,-rpath,@loader_path",
+        ],
+    },
     # MemorySanitizer-instrumented libc++, which --features=msan swaps in.
     libcxx_sha256 = "fd1ac49eeda4edc6deeda2037998e558718a63a5054fff4fdace7751b270217a",
     libcxx_url = "https://github.com/RealtimeRoboticsGroup/toolchains/releases/download/22.1.8/libcxx-msan-22.1.8-x86_64-linux-gnu-ubuntu-22.04.tar.zst",
     llvm_version = "22.1.8",
     stdlib = {
+        # The SDK's libc++.
+        "darwin-aarch64": "builtin-libc++",
         # SystemCore's sysroot keeps libstdc++ in a Buildroot layout that clang
         # finds on its own.
         "linux-aarch64": "dynamic-stdc++",

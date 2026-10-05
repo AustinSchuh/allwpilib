@@ -1,28 +1,33 @@
 """Sanitizer support for tests of an uninstrumented interpreter, such as Python."""
 
-_RUNTIME_DIR = "@llvm_toolchain_llvm//:lib/clang/22/lib/x86_64-unknown-linux-gnu/"
-
+# The shared runtime for each sanitizer, for the target OS; see
+# //shared/bazel/toolchains/llvm.
 _PRELOAD_RUNTIMES = {
-    "asan": _RUNTIME_DIR + "libclang_rt.asan.so",
-    "ubsan": _RUNTIME_DIR + "libclang_rt.ubsan_standalone.so",
+    sanitizer: "//shared/bazel/toolchains/llvm:{}_runtime".format(sanitizer)
+    for sanitizer in ["asan", "ubsan"]
 }
 
 def incompatible_with_unpreloadable_sanitizers():
     """Excludes an interpreter's tests from the sanitizers it can't preload.
 
     MSan needs every library instrumented, and TSan reports races throughout
-    an uninstrumented interpreter.
+    an uninstrumented interpreter. On macOS, SIP strips the preload on the way
+    to the interpreter.
     """
     return select({
         Label("//shared/bazel/toolchains/llvm:msan"): ["@platforms//:incompatible"],
         Label("//shared/bazel/toolchains/llvm:tsan"): ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }) + select({
+        Label("//shared/bazel/toolchains/llvm:asan_macos"): ["@platforms//:incompatible"],
+        Label("//shared/bazel/toolchains/llvm:ubsan_macos"): ["@platforms//:incompatible"],
         "//conditions:default": [],
     })
 
 def sanitizer_preload_data():
     """data for a test whose uninstrumented interpreter loads sanitized code."""
     return select({
-        Label("//shared/bazel/toolchains/llvm:" + sanitizer): [runtime]
+        Label("//shared/bazel/toolchains/llvm:" + sanitizer): [Label(runtime)]
         for sanitizer, runtime in _PRELOAD_RUNTIMES.items()
     } | {"//conditions:default": []})
 
@@ -34,7 +39,7 @@ def sanitizer_preload_env():
     """
     return select({
         Label("//shared/bazel/toolchains/llvm:" + sanitizer): {
-            "WPI_SANITIZER_PRELOAD": "$(rlocationpath " + runtime + ")",
+            "WPI_SANITIZER_PRELOAD": "$(rlocationpath {})".format(Label(runtime)),
         }
         for sanitizer, runtime in _PRELOAD_RUNTIMES.items()
     } | {"//conditions:default": {}})
