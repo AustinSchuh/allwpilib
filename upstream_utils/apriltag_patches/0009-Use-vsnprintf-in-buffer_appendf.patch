@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Austin Schuh <austin.linux@gmail.com>
+Date: Mon, 5 Oct 2026 19:50:41 -0700
+Subject: [PATCH 9/9] Use vsnprintf in buffer_appendf
+
+macOS deprecates vsprintf, which fails builds without _FORTIFY_SOURCE,
+such as ASan ones, under -Werror. The buffer is already sized for the
+output, so vsnprintf with that size writes the same thing.
+---
+ common/string_util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/string_util.c b/common/string_util.c
+index f7da2b8d77960febe07c52f770a9c4e3bbda29f0..7d71629ca233c0af52a8c4f058f72fdf0f51384a 100644
+--- a/common/string_util.c
++++ b/common/string_util.c
+@@ -700,7 +700,7 @@ static void buffer_appendf(char **_buf, int *bufpos, void *fmt, ...)
+     if (slen >= salloc) {
+         s = realloc(s, slen + 1);
+         va_start(ap, fmt);
+-        vsprintf((char*) s, fmt, ap);
++        vsnprintf(s, slen + 1, fmt, ap);
+         va_end(ap);
+     }
+ 

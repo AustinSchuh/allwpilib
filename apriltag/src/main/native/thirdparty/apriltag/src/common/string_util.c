@@ -700,7 +700,7 @@ static void buffer_appendf(char **_buf, int *bufpos, void *fmt, ...)
     if (slen >= salloc) {
         s = realloc(s, slen + 1);
         va_start(ap, fmt);
-        vsprintf((char*) s, fmt, ap);
+        vsnprintf(s, slen + 1, fmt, ap);
         va_end(ap);
     }
 
